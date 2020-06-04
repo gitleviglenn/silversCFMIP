@@ -21,7 +21,7 @@
 ; delT_amip_m4K = 4.5217
 ; delT_aqua     = 4.1391
 ;
-; levi silvers                                            mar 2020
+; levi silvers                                            june 2020
 ;-------------------------------------------------------------------------
 
 begin
@@ -1103,6 +1103,8 @@ end if
 ; I am still working out the normalizations for these profiles...
 ; 
 if (plotbias .gt. 0) then ; plot the cre feedback
+ print("using a bias.  what bias? ")
+ print("select bias.  ceres v2p8, ceres4p1 or piConrol ")
  cre_net_amip          =(cre_net_amip+cont_cre)/0.76
  cre_net_h2_historical =(cre_net_h2_historical+cont_cre)/0.8
  cre_net_abr2          =(cre_net_abr2+cont_cre)/3.99
