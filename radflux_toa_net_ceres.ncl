@@ -14,6 +14,9 @@
 ;
 ; CRE = all sky fluxes - clear sky fluxes
 ; 
+; ceres data is at a higher resolution (180x360 compared to 180x288) 
+; we need to interpolate CERES to AM4 grid
+;
 ; this script also prints out the global mean values of the fields
 ; to be plotted
 ; 
@@ -77,10 +80,9 @@ ceres_lw_cre_tmn=dim_avg_n(ceres_lw_cre,0)
 ceres_sw_cre=-ceres_sw_all+ceres_sw_clr
 ceres_sw_cre_tmn=dim_avg_n(ceres_sw_cre,0)
 
-; ceres data is at a higher resolution (180x360 than) so we need to interpolate CERES to the AM4 grid
-
-var_to_interpolate=ceres_swcre_tmn ; for ceres 2.8
-;var_to_interpolate=ceres_sw_cre_tmn ; for ceres 4.1
+; choose which version of CERES data for bias calculations
+;var_to_interpolate=ceres_swcre_tmn ; for ceres 2.8
+var_to_interpolate=ceres_sw_cre_tmn ; for ceres 4.1
 
 ;*************************************************************
 ; perform conservative remapping of ceres data to am4 grid
@@ -280,13 +282,7 @@ lat  = a1->lat
 rad  = 4.0*atan(1.0)/180.0
 clat = cos(lat*rad)
 field1_weighted_ave     = wgt_areaave(field1_mn,clat,1.0,1)
-;t2_weighted_ave     = wgt_areaave(t2,clat,1.0,1)
-;temp1_weighted_ave     = wgt_areaave(tempctl,clat,1.0,1)
-;temp2_weighted_ave     = wgt_areaave(tempctlpreg,clat,1.0,1)
 print("global mean field1 is: "+field1_weighted_ave)
-;print("global mean toa rad flux of ctl preg is: "+t2_weighted_ave)
-;print("global mean sfc temp of ctl is: "+temp1_weighted_ave)
-;print("global mean sfc temp of ctlpreg is: "+temp2_weighted_ave)
 ;---------------------------------------------------------------------
 radfluxtoa_weighted_ave = wgt_areaave(radfluxtoa,clat,1.0,1)
 print("global mean net radiation = "+radfluxtoa_weighted_ave)
@@ -295,8 +291,6 @@ print("global mean net radiation = "+radfluxtoa_weighted_ave)
 ;---------------------------------------------------------------------
 ; create colors to use in contours
 ; contour levels
-;my_levels1 = (/265,270,275,280,284,286,288,290,292,294,296,298,300,302,304/)
-;my_levels_nettoa = (/-120,-90,-60,-30,0, 30,60,90,120/)
 my_levels_nettoa = (/-80,-60,-40,-20,0, 20,40,60,80/)
 my_levels_posneg = (/-40,-30,-20,-10,0, 10,20,30,40/) ; plots 10 colors
 my_levels_netcre = (/5,0,-10,-20,-30,-40,-50,-60,-70/)
@@ -318,7 +312,6 @@ my_levels_11posneg = (/-90,-80,-70,-60,-50,-40,-30,-20,-10,0,10/) ; plots 20 col
 my_levels_11posneg_b = (/-15,-12,-9,-6,-3,0,3,6,9,12,15/) ; plots 20 colors (9 nums) 1 less than thought
 my_colors_13posneg = (/10,20,30,40,50,60,70,80,90,100,150,180,210/) ; 20 colors (21 nums) 1 more than thought
 my_colors_13posneg_b = (/10,33,53,73,93,100,150,166,182,198,214,230,246/) ; 20 colors (21 nums) 1 more than thought
-;my_levels_20posneg = (/-9,-8,-7,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7,8,9/) ; plots 20 colors (19 nums) 1 less than thought
 my_levels_20posneg = (/-18,-16,-14,-12,-10,-8,-6,-4,-2,0,2,4,6,8,10,12,14,16,18/) ; plots 20 colors (19 nums) 1 less than thought
 my_levels_20posneg_pm85 = (/-85,-75,-65,-55,-45,-35,-25,-15,-5,0,5,15,25,35,45,55,65,75,85/) ; plots 20 colors (19 nums) 1 less than thought
 my_colors_20posneg = (/ 10,23,33,43,53,63,73,83,93,103,127,151,161,171,181,191,201,211,221,231,241/) ; 20 colors (21 nums) 1 more than thought
