@@ -1,5 +1,6 @@
-;================================================;
+;***********************************************************************************
 ;cloud_table_misr_am4vsobs.ncl 
+;***********************************************************************************
 ;
 ; Observations:  https://esgf-node.llnl.gov/projects/obs4mips/
 ; above is a link to a useful website with observations 
@@ -31,15 +32,16 @@
 ;
 ; still to do: 
 ; 	cosine weight data for selected geographic regions
-;       add all data from AM4, not just first 5 years of amip
+;       do we want to only look at the years that match with the MISR data?  
+;       do we want to show difference plots instead of of base output?
 ;
-; levi silvers  		feb 2020
-;================================================;
+; levi silvers  	                                	june 2020
+;***********************************************************************************
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"   
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_csm.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/contributed.ncl"   
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"   
-; ================================================;
+;***********************************************************************************
 
 ;;;----------------------------------------------------------------------
 ;;; Procedure to attach a labelbar to the bottom of plot.
@@ -95,11 +97,13 @@ begin
 ;;;filein="/archive/Levi.Silvers/data/c96L32_am4G12r16_2010climo_new_cosp/atmos_month_misr/atmos_month_misr.0002-0011.alltmn_wavg.nc"
 
 filein=systemfunc("ls /Users/silvers/data/cfmip_clouds/clmisr_Emon_GFDL-CM4_amip_r1i1p1f1_gr1_*nc")
-;filein="/Users/silvers/data/cfmip_clouds/clmisr_Emon_GFDL-CM4_amip_r1i1p1f1_gr1_197901-198412.nc"
 ;filein="/Users/silvers/data/cfmip_clouds/clmisr_Emon_GFDL-CM4_amip_r1i1p1f1_gr1_200301-200812.nc"
-obs_filein="/Users/silvers/data/cfmip_clouds/clmisr_Emon_GFDL-CM4_amip_r1i1p1f1_gr1_197901-198412.nc"
+;obs_filein="/Users/silvers/data/cfmip_clouds/clmisr_Emon_GFDL-CM4_amip_r1i1p1f1_gr1_197901-198412.nc"
 
-obs_filein="/Users/silvers/data/SatData/MISR/clMISR/clMISR_obs4MIPS_20000601_20130531_tmn.nc"
+to_misr="/Users/silvers/data/SatData/MISR_fromRoj/MISR_CTH_OD_histograms_v7/"
+
+;obs_filein="/Users/silvers/data/SatData/MISR/clMISR/clMISR_obs4MIPS_20000601_20130531_tmn.nc"
+obs_filein=to_misr+"clMISR_obs4MIPs_200003th201911.timemn.nc"
 
 ;infile     = addfile(filein,"r")
 infile     = addfiles(filein,"r")
@@ -370,17 +374,20 @@ print("sum of SH 30 to 60 misr cloud fraction: "+sum(field_obs_sh30t60))
 ;print(fields(:,10))
 ;printVarSummary(fields_obs)
 
+;----------------------------------------------------
+; Domain To Plot
 ; define which region to tabulate and set titles...
+;----------------------------------------------------
 
-;fields     = field_gmn_am4
-;fields_obs = field_obs_gmn
-;titleRight="MISR: Global mn"
-;titleLeft ="AM4: Global mn"
+fields     = field_gmn_am4
+fields_obs = field_obs_gmn
+titleRight="MISR: Global mn"
+titleLeft ="AM4: Global mn"
 
-fields     = field_am4_pm30
-fields_obs = field_obs_pm30
-titleRight="MISR: 30S to 30N"
-titleLeft ="AM4: 30S to 30N"
+;fields     = field_am4_pm30
+;fields_obs = field_obs_pm30
+;titleRight="MISR: 30S to 30N"
+;titleLeft ="AM4: 30S to 30N"
 
 ;fields     = field_am4_nh30t60
 ;fields_obs = field_obs_nh30t60
@@ -522,8 +529,8 @@ obs_cols_for_txt = where(obs_cols_for_vals.eq."Navy".or.obs_cols_for_vals.eq."Me
 xtitle="hieght (km)"
 ytitle="optical depth"
 ;
-  ;wks = gsn_open_wks("newPDF","testplot")
-  wks = gsn_open_wks("eps","testplot")
+  ;wks = gsn_open_wks("newPDF","testplot_v7_allyrs")
+  wks = gsn_open_wks("eps","testplot_cldtable")
   gsn_define_colormap(wks,colors)
 ;
 ;  ;

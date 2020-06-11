@@ -2,6 +2,8 @@
 ; cf_misr_vs_am4.ncl
 ;***********************************************************************************
 ;
+; still need to use all the am4 data, not just 5 years
+;
 ; plot global cloud fraction from both the misr satellite simulator and from
 ; the misr observations.
 ;
@@ -52,7 +54,8 @@ begin
   ;infile=dirin+"atmos_month_misr_mtime_under3km_tau_mn_final.nc"
   infile=dirin+"clmisr_Emon_GFDL-CM4_amip_r1i1p1f1_gr1_199701-200212.nc"
   ;infile_obs="/Users/silvers/data/obs/clMISR_obs4MIPS_20000601_20130531_tmn.nc"
-  infile_obs="/Users/silvers/data/SatData/MISR_fromRoj/MISR_CTH_OD_histograms_v7/clMISR_obs4MIPs_MISR_V7_1year_2018b_timemn_test.nc"
+  to_misr="/Users/silvers/data/SatData/MISR_fromRoj/MISR_CTH_OD_histograms_v7/"
+  infile_obs=to_misr+"clMISR_obs4MIPs_200003th201911.timemn.nc"
   maintitle_top="MISR cloud fraction for thick clouds"
   maintitle_bot="MISR cloud fraction for thin clouds"
   a = addfile(infile,"r")
@@ -72,7 +75,7 @@ print("infile for misr observations is: "+infile_obs)
 ; tau limits
 ; height limits (recall there are 16 levels)
 z_bot=0
-z_top=15
+z_top=7
 
 print("dimsizes of am4 incoming data is: "+dimsizes(cfrac_total))
   cfrac_thin  = a->$var2read$(:,1:2,z_bot:z_top,:,:) ; for thin clouds (0.3:1.3) 
@@ -82,7 +85,7 @@ print("dimsizes of am4 incoming data is: "+dimsizes(cfrac_total))
 ;
 
   cfrac_misr_thin  = m_obs->$var_obs$(0,1:2,z_bot:z_top,:,:) ; for thin clouds      
-  cfrac_misr_thick = m_obs->$var_obs$(0,3:5,:,:,:) ; for thicker clouds      
+  cfrac_misr_thick = m_obs->$var_obs$(0,3:5,z_bot:z_top,:,:) ; for thicker clouds      
   ;cfrac_misr_thick = m_obs->$var_obs$(0,3:4,z_bot:z_top,:,:) ; for thicker clouds      
   ;cfrac_misr_thick = m_obs->$var_obs$(0,:,z_bot:z_top,:,:) ; for thicker clouds      
 ;  cfrac_misr_all = m_obs->$var_obs$(:,:,:,:,:) ; for thicker clouds      
@@ -342,7 +345,7 @@ print("weighted average of thick misr clouds: "+obs_cfmisr_tck_weighted_ave)
 ;  my_colors = (/25,28,35,41,46,53,59,65,69,75,79,85,91,95,97,101/) ; 16
   my_colors = (/30,37,44,51,58,65,72,79,86,93,100/) ; 11
 
-  wks = gsn_open_wks("eps","testplot")          ; send graphics to ps file
+  wks = gsn_open_wks("eps","testplot_cf")          ; send graphics to ps file
   ;wks = gsn_open_wks("newPDF","testplot")          ; send graphics to ps file
   ;wks = gsn_open_wks("png","testplot")          ; send graphics to PNG file
   ;gsn_define_colormap(wks,"WhBlGrYeRe")
