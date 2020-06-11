@@ -2,10 +2,14 @@
 ; cf_misr_vs_am4.ncl
 ;***********************************************************************************
 ;
-; plot global cloud fraction as computed with the misr cosp tool.
+; plot global cloud fraction from both the misr satellite simulator and from
+; the misr observations.
 ;
 ; example here is for clouds with tau .gt. 0.3
 ; for reference see Fig 9 of Marchand et al. 2010 JGR
+; there is also a similar figure in Zhange et al. 2019 JAMES
+;
+; Updated MISR data was optained from Roger Marchand in Spring 2020
 ;
 ; in the observations file, there is a -1 value of tau before 0.15
 ; in general the tau levels in misr are:
@@ -30,7 +34,10 @@
 ;
 ; model data will need to be pp'ed with the script misr_pp_yrlowcl.s
 ;
-; levi silvers							nov 2019
+; this was used to eliminate the record dimensino....
+; ncwa -a record clMISR_obs4MIPs_MISR_V7_1year_2018b_timemn.nc clMISR_obs4MIPs_MISR_V7_1year_2018b_timemn_test.nc
+;
+; levi silvers							june 2020
 ;***********************************************************************************
 ; These files are loaded by default in NCL V6.2.0 and newer
  load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
@@ -44,7 +51,8 @@ begin
   dirin="/Users/silvers/data/cfmip_clouds/"
   ;infile=dirin+"atmos_month_misr_mtime_under3km_tau_mn_final.nc"
   infile=dirin+"clmisr_Emon_GFDL-CM4_amip_r1i1p1f1_gr1_199701-200212.nc"
-  infile_obs="/Users/silvers/data/obs/clMISR_obs4MIPS_20000601_20130531_tmn.nc"
+  ;infile_obs="/Users/silvers/data/obs/clMISR_obs4MIPS_20000601_20130531_tmn.nc"
+  infile_obs="/Users/silvers/data/SatData/MISR_fromRoj/MISR_CTH_OD_histograms_v7/clMISR_obs4MIPs_MISR_V7_1year_2018b_timemn_test.nc"
   maintitle_top="MISR cloud fraction for thick clouds"
   maintitle_bot="MISR cloud fraction for thin clouds"
   a = addfile(infile,"r")
