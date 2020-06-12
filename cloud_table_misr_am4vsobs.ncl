@@ -31,7 +31,6 @@
 ; These levels are correct as per: http://clipc-services.ceda.ac.uk/dreq/u/dim:alt16.html
 ;
 ; still to do: 
-; 	cosine weight data for selected geographic regions
 ;       do we want to only look at the years that match with the MISR data?  
 ;       do we want to show difference plots instead of of base output?
 ;
@@ -274,22 +273,25 @@ field_wave_misr  = wgt_areaave(obs_fields_tmn,clat,1.0,0)
 ; grab a particular region of the data, and that same regions lat array
 ; and use this to create a cosine weighted mean for a non-global region
 
-fields_pm30    =obs_fields_tmn(:,:,60:119,:)
-fields_am4_pm30=fields_tmn_noland(:,:,60:119,:)
+dom_bot=1
+dom_top=6
+
+fields_pm30    =obs_fields_tmn(:,dom_bot:dom_top,60:119,:)
+fields_am4_pm30=fields_tmn_noland(:,dom_bot:dom_top,60:119,:)
 pm30lat        =clat(60:119)
 
-fields_nh30t60 =obs_fields_tmn(:,:,120:149,:)
-fields_am4_nh30t60 =fields_tmn_noland(:,:,120:149,:)
+fields_nh30t60 =obs_fields_tmn(:,dom_bot:dom_top,120:149,:)
+fields_am4_nh30t60 =fields_tmn_noland(:,:dom_bot:dom_top,120:149,:)
 nhlat30to60    =clat(120:149)
-fields_sh30t60 =obs_fields_tmn(:,:,30:59,:)
-fields_am4_sh30t60 =fields_tmn_noland(:,:,30:59,:)
+fields_sh30t60 =obs_fields_tmn(:,dom_bot:dom_top,30:59,:)
+fields_am4_sh30t60 =fields_tmn_noland(:,:dom_bot:dom_top,30:59,:)
 shlat30to60    =clat(30:59)
 
-fields_nh30t90 =obs_fields_tmn(:,:,120:179,:)
-fields_am4_nh30t90 =fields_tmn_noland(:,:,120:179,:)
+fields_nh30t90 =obs_fields_tmn(:,dom_bot:dom_top,120:179,:)
+fields_am4_nh30t90 =fields_tmn_noland(:,:dom_bot:dom_top,120:179,:)
 nhlat30to90    =clat(120:179)
-fields_sh30t90 =obs_fields_tmn(:,:,0:59,:)
-fields_am4_sh30t90 =fields_tmn_noland(:,:,0:59,:)
+fields_sh30t90 =obs_fields_tmn(:,dom_bot:dom_top,0:59,:)
+fields_am4_sh30t90 =fields_tmn_noland(:,dom_bot:dom_top,0:59,:)
 shlat30to90    =clat(0:59)
 
 ; computed weighted means
@@ -370,35 +372,40 @@ print("sum of SH 30 to 60 misr cloud fraction: "+sum(field_obs_sh30t60))
 ;fields     =field_wave_nh_misr
 ;fields_obs =field_wave_sh_misr
 
-;  print("dimsizes of fields are:"+dimsizes(fields))
-;print(fields(:,10))
-;printVarSummary(fields_obs)
-
 ;----------------------------------------------------
 ; Domain To Plot
 ; define which region to tabulate and set titles...
 ;----------------------------------------------------
 
-fields     = field_gmn_am4
-fields_obs = field_obs_gmn
-titleRight="MISR: Global mn"
-titleLeft ="AM4: Global mn"
+DomainOfInterest=0
 
-;fields     = field_am4_pm30
-;fields_obs = field_obs_pm30
-;titleRight="MISR: 30S to 30N"
-;titleLeft ="AM4: 30S to 30N"
-
-;fields     = field_am4_nh30t60
-;fields_obs = field_obs_nh30t60
-;titleRight="MISR: 30 to 60 NH"
-;titleLeft ="AM4: 30 to 60 NH"
-
-;fields     = field_am4_sh30t60
-;fields_obs = field_obs_sh30t60
-;titleRight="MISR: 30 to 60 SH"
-;titleLeft ="AM4: 30 to 60 SH"
-
+if (DomainOfInterest .lt. 1) then  ; default is 0 and plots global
+  print("!!!!! plotting Global mean data !!!!!")
+  fields     = field_gmn_am4
+  fields_obs = field_obs_gmn
+  titleRight="MISR: Global mn"
+  titleLeft ="AM4: Global mn"
+else if (DomainOfInterest .lt. 2) then
+  print("!!!!! plotting Tropical mean data !!!!!")
+  fields     = field_am4_pm30
+  fields_obs = field_obs_pm30
+  titleRight="MISR: 30S to 30N"
+  titleLeft ="AM4: 30S to 30N"
+else if (DomainOfInterest .lt. 3) then
+  print("!!!!! plotting mean data from 30N to 60N !!!!!")
+  fields     = field_am4_nh30t60
+  fields_obs = field_obs_nh30t60
+  titleRight="MISR: 30 to 60 NH"
+  titleLeft ="AM4: 30 to 60 NH"
+else 
+  print("!!!!! plotting mean data from 30S to 60S !!!!!")
+  fields     = field_am4_sh30t60
+  fields_obs = field_obs_sh30t60
+  titleRight="MISR: 30 to 60 SH"
+  titleLeft ="AM4: 30 to 60 SH"
+end if
+end if
+end if
 
 
 ;-----------------------------------------------------------------
@@ -427,21 +434,11 @@ fields_obs&alt16  =fields_full&alt16
 cf_array&alt16    =fields_full&alt16
 cf_array_obs&alt16=fields_full&alt16
 
-;  print("--------- old fields --------")
-;  printVarSummary(fields)
-;  printVarSummary(fields_obs)
-
 cf_array     =fields(alt16|:,tau|:)
 cf_array_obs =fields_obs(alt16|:,tau|:)
 
-;  print("--------- cf array 1----------")
-;  printVarSummary(cf_array)
-;  print("--------- cf array 2----------")
 cf_array     =cf_array(::-1,:)
 cf_array_obs =cf_array_obs(::-1,:)
-;  printVarSummary(cf_array)
-;  print("-----------------------------")
-
 
 ;-----------------------------------------------------------
 ; save data for tables to text_values and text_obs
