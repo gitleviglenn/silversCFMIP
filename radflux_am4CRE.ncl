@@ -1033,9 +1033,11 @@ else
 end if
 end if
 if (plotbias .gt. 0) then ; plot the cre feedback
- res@tiMainString = "Cloud Radiative Effect bias"
- res@trYMinF = -20 
- res@trYMaxF = 10 
+ res@tiYAxisString  = "[W/m2K]" 
+ ;res@tiMainString = "Cloud Radiative Effect bias"
+ res@tiMainString = "CRE Feedback from PiControl"
+ res@trYMinF = -15 
+ res@trYMaxF = 15 
 end if
 
  res@xyLineColors=colors(3)
@@ -1284,15 +1286,16 @@ end if
  ;lgres@lgDashIndexes          = (/"0","0","0","0"/)
  lgres@lgPerimOn            = False
 
+  resP                 = True
 ; draw panel with white space added
-if (plotbias .ge. 0) then ; plot the cre feedback
+if (plotbias .le. 0) then ; plot the cre feedback
   if (everything .ge. 2) then
    print("everything is greather than 2")
    legend  = gsn_create_legend (wks, 4, labels_cre, lgres)
    lgres@lgLineColors         = (/colors_cre(7),colors_cre(2),colors_cre(3),colors_cre(8)/)
    lgres@lgDashIndexes = (/"0","0","0","0"/)
    legend  = gsn_create_legend (wks, 4, labels_cre, lgres)
-   resP                 = True
+   ;resP                 = True
    resP@amJust = "BottomRight"
    ;resP@amParallelPosF   = 0.42    ; Move legend to right
    ;resP@amOrthogonalPosF = -0.1     ; Move legend down more negative moves higher
@@ -1302,7 +1305,7 @@ if (plotbias .ge. 0) then ; plot the cre feedback
   else if(everything .ge. 1) then ; plot the whole shebang
    legend  = gsn_create_legend (wks, 3, labels, lgres)
    lgres@lgDashIndexes = (/"0","0","0","0"/)
-   resP                 = True
+   ;resP                 = True
    resP@amJust = "BottomRight"
    ;resP@amParallelPosF   = 0.42    ; Move legend to right
    resP@amParallelPosF   = -0.12    ; Move legend to right
@@ -1316,7 +1319,7 @@ if (plotbias .ge. 0) then ; plot the cre feedback
    lgres@lgLineColors         = (/colors(1),colors(4),colors(5),colors(6),colors(0),colors(0)/)
    lgres@lgDashIndexes          = (/"0","0","0","0","1","0"/)
    legend  = gsn_create_legend (wks, 6, labels_b, lgres)
-   resP                 = True
+   ;resP                 = True
    resP@amJust = "BottomRight"
    resP@amParallelPosF   = -0.08    ; Move legend to right
    resP@amOrthogonalPosF = -0.05     ; Move legend down more negative moves higher
@@ -1326,7 +1329,7 @@ if (plotbias .ge. 0) then ; plot the cre feedback
    annoid = gsn_add_annotation(plot_alt_1,legend,resP) ; add legend to plot
   end if 
   end if
-  resP                 = True
+  ;resP                 = True
   annoid = gsn_add_annotation(plot_alt_1,legend,resP) ; add legend to plot
 end if
 
