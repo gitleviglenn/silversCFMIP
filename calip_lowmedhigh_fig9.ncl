@@ -13,6 +13,14 @@
 ; left column:  plotbias=0; includelegend=1
 ; right column: plotbias=1; includelegend=0
 ;
+; piC        --> PreIndustrial Control
+; var1/data1 --> amip +4K
+; var2/data2
+; var3/data3 --> coupled historical simulation
+; var4/data4 --> coupled 4XCO2
+; var5/data5 --> 1pctCO2
+; var6/data6 --> amip Future 4K
+;
 ; the center and righ column plot the profiles relative to a control experiment
 ; this experiment can be chosen as either the AMIP or PiControl experiment with 
 ; the controlexp switch. 
@@ -309,8 +317,6 @@ print("amip -4K data is: "+infile2_l)
   endi=779
   ;starti=endi-120
   var3_l_10yr = data_3_l->$varname1$(starti:endi,:,:) ; low clouds from exp a
-  ;var3_l_10yrfull = data_3_l->$varname1$(:,:,:) ; low clouds from exp a
-  ;print("dimensions of historical file: "+dimsizes(var3_l_10yrfull))
   var3_l_tmn=dim_avg_n(var3_l_10yr,0) ; average over time
   var3_m_10yr = data_3_m->$varname2$(starti:endi,:,:) ; mid clouds from exp a
   var3_m_tmn=dim_avg_n(var3_m_10yr,0)
@@ -539,22 +545,12 @@ tmYFontSize = 0.010  ; sets the height of the Y-Axis labels in NDC coordinates
     res@vpXF     = figl
     res@vpYF     = figtop
 
-;    res@xyLineColors=colors(0)
-;    plot0obs=gsn_csm_xy(wks,latitude_calip(:),var3calscale_zmn(:),res)
     res@xyLineColors=colors(1)
     plot0a=gsn_csm_xy(wks,latitude(:),var_h_ztmn(:),res)
-;    res@xyLineColors=colors(1)
-;    plot0a_f=gsn_csm_xy(wks,latitude(:),var_h_full_ztmn(:),res)
     res@xyLineColors=colors(2)
     plot0b=gsn_csm_xy(wks,latitude(:),var1_h_ztmn(:),res)
-;    res@xyLineColors=colors(3)
-;    plot0c=gsn_csm_xy(wks,latitude(:),var2_h_ztmn(:),res)
     res@xyLineColors=colors(4)
     plot0d=gsn_csm_xy(wks,latitude(:),var3_h_ztmn(:),res)
-;    res@xyLineColors=colors(4)
-;    plot0d_f=gsn_csm_xy(wks,latitude(:),var3_h_full_ztmn(:),res)
-;    res@xyLineColors=colors(4)
-;    plot0d_ef=gsn_csm_xy(wks,latitude(:),var3_h_efull_ztmn(:),res)
     res@xyLineColors=colors(5)
     plot0e=gsn_csm_xy(wks,latitude(:),var4_h_ztmn(:),res)
     res@xyLineColors=colors(6)
@@ -564,18 +560,6 @@ tmYFontSize = 0.010  ; sets the height of the Y-Axis labels in NDC coordinates
     res@xyLineColors=colors(0)
     plot0h=gsn_csm_xy(wks,latitude(:),var_pic_h_ztmn(:),res)
 ;
-;    overlay(plot0a,plot0b)    ; amip p4K
-;    overlay(plot0a,plot0obs)  ; plot0a is usually not the full amip period, but 2005-2014
-;    overlay(plot0a,plot0c)    ; amip m4K
-;    ;overlay(plot0a,plot0d)    ; 2005-2014 of historical, i think
-;    ;overlay(plot0a,plot0d_f) ; 1950-2014
-;    ;overlay(plot0a,plot0d_ef); 1850-1949
-;    overlay(plot0a,plot0a_f) ; full amip period
-;    overlay(plot0a,plot0g)    ; amip future 4K
-;    ;overlay(plot0a,plot0e)
-;    ;overlay(plot0a,plot0f)
-;    overlay(plot0a,plot0h)  ; picontrol
-
     plot(0)=plot0a
 
     if (plotbias .gt. 0) then
@@ -592,22 +576,12 @@ tmYFontSize = 0.010  ; sets the height of the Y-Axis labels in NDC coordinates
     res@vpYF     = figmid
 
     res@tiMainString = "Mid-Level Cloud Fraction"
-;    res@xyLineColors=colors(0)
-;    plot1obs=gsn_csm_xy(wks,latitude_calip(:),var2calscale_zmn(:),res)
     res@xyLineColors=colors(1)
     plot1a=gsn_csm_xy(wks,latitude(:),var_m_ztmn(:),res)
-;    res@xyLineColors=colors(1)
-;    plot1a_f=gsn_csm_xy(wks,latitude(:),var_m_full_ztmn(:),res)
     res@xyLineColors=colors(2)
     plot1b=gsn_csm_xy(wks,latitude(:),var1_m_ztmn(:),res)
-;    res@xyLineColors=colors(3)
-;    plot1c=gsn_csm_xy(wks,latitude(:),var2_m_ztmn(:),res)
     res@xyLineColors=colors(4)
     plot1d=gsn_csm_xy(wks,latitude(:),var3_m_ztmn(:),res)
-;    res@xyLineColors=colors(4)
-;    plot1d_f=gsn_csm_xy(wks,latitude(:),var3_m_full_ztmn(:),res)
-;    res@xyLineColors=colors(4)
-;    plot1d_ef=gsn_csm_xy(wks,latitude(:),var3_m_efull_ztmn(:),res)
     res@xyLineColors=colors(5)
     plot1e=gsn_csm_xy(wks,latitude(:),var4_m_ztmn(:),res)
     res@xyLineColors=colors(6)
@@ -616,18 +590,6 @@ tmYFontSize = 0.010  ; sets the height of the Y-Axis labels in NDC coordinates
     plot1g=gsn_csm_xy(wks,latitude(:),var6_m_ztmn(:),res)
     res@xyLineColors=colors(0)
     plot1h=gsn_csm_xy(wks,latitude(:),var_pic_m_ztmn(:),res)
-;
-;    overlay(plot1a,plot1b)  ; amip p4K
-;    overlay(plot1a,plot1obs)
-;    overlay(plot1a,plot1c)  ; amip m4k
-;;    overlay(plot1a,plot1d)   ; 2005-2014
-;    ;overlay(plot1a,plot1d_f)
-;    ;overlay(plot1a,plot1d_ef)
-;    overlay(plot1a,plot1a_f) ; full amip period
-;    ;overlay(plot1a,plot1e)
-;    overlay(plot1a,plot1g)
-;    ;overlay(plot1a,plot1f)
-;    overlay(plot1a,plot1h) ; picontrol
 
     plot(1)=plot1a
 
@@ -646,20 +608,12 @@ tmYFontSize = 0.010  ; sets the height of the Y-Axis labels in NDC coordinates
 
     res@tiMainString = "Low-Level Cloud Fraction"
 
-;    res@xyLineColors=colors(0)
-;    plot2obs=gsn_csm_xy(wks,latitude_calip(:),var1calscale_zmn(:),res)
     res@xyLineColors=colors(1)
     plot2a=gsn_csm_xy(wks,latitude(:),var_l_ztmn(:),res)
-;    plot2a_f=gsn_csm_xy(wks,latitude(:),var_l_full_ztmn(:),res)
     res@xyLineColors=colors(2)
     plot2b=gsn_csm_xy(wks,latitude(:),var1_l_ztmn(:),res)
-;    res@xyLineColors=colors(3)
-;    plot2c=gsn_csm_xy(wks,latitude(:),var2_l_ztmn(:),res)
     res@xyLineColors=colors(4)
     plot2d=gsn_csm_xy(wks,latitude(:),var3_l_ztmn(:),res)
-;    res@xyLineColors=colors(4)
-;    plot2d_f=gsn_csm_xy(wks,latitude(:),var3_l_full_ztmn(:),res)
-;    plot2d_ef=gsn_csm_xy(wks,latitude(:),var3_l_efull_ztmn(:),res)
     res@xyLineColors=colors(5)
     plot2e=gsn_csm_xy(wks,latitude(:),var4_l_ztmn(:),res)
     res@xyLineColors=colors(6)
@@ -668,18 +622,6 @@ tmYFontSize = 0.010  ; sets the height of the Y-Axis labels in NDC coordinates
     plot2g=gsn_csm_xy(wks,latitude(:),var6_l_ztmn(:),res)
     res@xyLineColors=colors(0)
     plot2h=gsn_csm_xy(wks,latitude(:),var_pic_l_ztmn(:),res)
-
-;    overlay(plot2a,plot2b)
-;    overlay(plot2a,plot2obs)
-;    overlay(plot2a,plot2c)
-;    ;overlay(plot2a,plot2d)    ; 2005-2014
-;    ;overlay(plot2a,plot2d_f)
-;    ;overlay(plot2a,plot2d_ef)
-;    overlay(plot2a,plot2a_f)
-;    ;overlay(plot2a,plot2e)
-;    overlay(plot2a,plot2g)
-;    ;overlay(plot2a,plot2f)
-;    overlay(plot2a,plot2h)
 
     plot(2)=plot2a
 
