@@ -39,7 +39,7 @@ everything = 0 ; switch defining which profiles are plotted
 ; 1 plots the shortwave, longwave, and net CRE for amip and aqua
 ; 2 plots CRE Feedback figure showing aqua and amip-based warming experiments
 
-plotbias = 0 ; default is 0; for plotbias=1, a bias is plotted 
+plotbias = 1 ; default is 0; for plotbias=1, a bias is plotted 
 
 ; years for the abrupt and ramp warming experiments
 early="000101-010012"
@@ -561,9 +561,9 @@ h2_rlutcs_historical=add_rlutcs_historical->rlutcs(firstmonth:lastmonth,:,:)
 add_rsdt_historical=addfile(infile5,"r")
 h2_rsdt_historical=add_rsdt_historical->rsdt(firstmonth:lastmonth,:,:)
 ;
-;print("!@#$Q$#^#$^%&$^*")
-;print("one of the historical files is: "+infile2)
-;print("!@#$Q$#^#$^%&$^*")
+print("!@#$Q$#^#$^%&$^*")
+print("Years? one of the historical files is: "+infile2)
+print("!@#$Q$#^#$^%&$^*")
 ;
 ;; average data
 h2_rsut_historical_tmn=dim_avg_n(h2_rsut_historical,0)
@@ -592,16 +592,17 @@ cre_net_h2_historical&lat=h2_rsut_historical&lat
 ;;-------------------------------------------------------------------------
 ; for 1pctCO2 
 ;-------------------------------------------------------------------------
-filename="rsut_Amon_GFDL-CM4_1pctCO2_r1i1p1f1_gr1_010101-015012.nc"
+filename="rsut_Amon_GFDL-CM4_1pctCO2_r1i1p1f1_gr1_"+warm_yrs+".nc"
 infile1=path+filename
-filename="rsutcs_Amon_GFDL-CM4_1pctCO2_r1i1p1f1_gr1_010101-015012.nc"
+filename="rsutcs_Amon_GFDL-CM4_1pctCO2_r1i1p1f1_gr1_"+warm_yrs+".nc"
 infile2=path+filename
-filename="rlut_Amon_GFDL-CM4_1pctCO2_r1i1p1f1_gr1_010101-015012.nc"
+filename="rlut_Amon_GFDL-CM4_1pctCO2_r1i1p1f1_gr1_"+warm_yrs+".nc"
 infile3=path+filename
-filename="rlutcs_Amon_GFDL-CM4_1pctCO2_r1i1p1f1_gr1_010101-015012.nc"
+filename="rlutcs_Amon_GFDL-CM4_1pctCO2_r1i1p1f1_gr1_"+warm_yrs+".nc"
 infile4=path+filename
-filename="rsdt_Amon_GFDL-CM4_1pctCO2_r1i1p1f1_gr1_010101-015012.nc"
+filename="rsdt_Amon_GFDL-CM4_1pctCO2_r1i1p1f1_gr1_"+warm_yrs+".nc"
 infile5=path+filename
+print("Years?  One of the 1pctCO2 files is: "+filename)
 ;
 ;; read data
 add_rsut_1pctCO2=addfile(infile1,"r")
