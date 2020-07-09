@@ -34,7 +34,7 @@ path_obs="/Users/silvers/data/SatData/CERES/"
 ; everything = 2; plotbias = 0 --> Panel on far right showing amip type feedback experiments
 
 
-everything = 0 ; switch defining which profiles are plotted
+everything = 2 ; switch defining which profiles are plotted
 ; 0 plots the CRE from: ceres, amip, historical, abrupt, and 1pct
 ; 1 plots the shortwave, longwave, and net CRE for amip and aqua
 ; 2 plots CRE Feedback figure showing aqua and amip-based warming experiments
@@ -988,6 +988,7 @@ amip_b=amip_cre_fb_p4K*clat_am4/180
   res@tiYAxisFont    = 21
   res@tiYAxisFontHeightF = fontsize 
   res@tiXAxisString  = "Latitude"
+  ;res@tiXAxisString  = ""
   res@tiXAxisFont    = 21
   res@tiXAxisFontHeightF = fontsize
  
@@ -1027,18 +1028,19 @@ else if (everything .ge. 1) then ; plot the whole shebang
  res@trYMinF = -70 
  res@trYMaxF = 110 
 else
- res@tiMainString = "Cloud Radiative Effect "
- res@tiYAxisString  = "[W/m2]" 
+ res@tiMainString = "Cloud Radiative Effect (CRE)"
+; res@tiYAxisString  = "[W/m2]" 
+ res@tiYAxisString  = "CRE (W "+"m~S~-2"+"~N~"+")" 
  res@trYMinF = -50 
  res@trYMaxF = 10 
 end if
 end if
 if (plotbias .gt. 0) then ; plot the cre feedback
- res@tiYAxisString  = "[W/m2K]" 
- ;res@tiMainString = "Cloud Radiative Effect bias"
- res@tiMainString = "CRE Feedback from PiControl"
- res@trYMinF = -15 
- res@trYMaxF = 15 
+ res@tiYAxisString  = "CRE Feedback (W "+"m~S~-2~NN~K~S~-1"+"~N~"+")" 
+ ;res@tiMainString = "Feedback relative to piControl"
+ res@tiMainString = "SW Feedback relative to amip"
+ res@trYMinF = -4 
+ res@trYMaxF = 1 
 end if
 
  res@xyLineColors=colors(3)
