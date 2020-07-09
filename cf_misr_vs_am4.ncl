@@ -27,7 +27,7 @@
 ;
 ; the longitude dimensions for the am4 data and the misr observations are not
 ; lined up with each other.  
-
+;
 ; to shift the long dims to start at 0.5 use: lonPivot(cfrac_thin_misr,0.5)
 ; to flib the latitude dim use:               cfrac_thin_misr(::-1,:)
 ;
