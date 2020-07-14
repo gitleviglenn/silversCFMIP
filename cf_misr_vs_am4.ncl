@@ -49,38 +49,47 @@ begin
 ;-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 ; read in netCDF files
 ;-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-  ;dirin="/work/Levi.Silvers/moddata/misr_am4g10r8_taugt0p3/"
-  dirin="/Users/silvers/data/cfmip_clouds/"
-  ;infile=dirin+"atmos_month_misr_mtime_under3km_tau_mn_final.nc"
-  infile=dirin+"clmisr_Emon_GFDL-CM4_amip_r1i1p1f1_gr1_199701-200212.nc"
-  ;infile_obs="/Users/silvers/data/obs/clMISR_obs4MIPS_20000601_20130531_tmn.nc"
-  to_misr="/Users/silvers/data/SatData/MISR_fromRoj/MISR_CTH_OD_histograms_v7/"
-  infile_obs=to_misr+"clMISR_obs4MIPs_200003th201911.timemn.nc"
-  maintitle_top="MISR cloud fraction for thick clouds"
-  maintitle_bot="MISR cloud fraction for thin clouds"
-  a = addfile(infile,"r")
-  m_obs = addfile(infile_obs,"r")
+;dirin="/work/Levi.Silvers/moddata/misr_am4g10r8_taugt0p3/"
+
+dirin="/Users/silvers/data/cfmip_clouds/"
+to_misr="/Users/silvers/data/SatData/MISR_fromRoj/MISR_CTH_OD_histograms_v7/"
+
+;infile=dirin+"atmos_month_misr_mtime_under3km_tau_mn_final.nc"
+
+;infile=dirin+"clmisr_Emon_GFDL-CM4_amip_r1i1p1f1_gr1_199701-200212.nc"
+; read all clmisr AM4 data
+infile=systemfunc("ls /Users/silvers/data/cfmip_clouds/clmisr_Emon_GFDL-CM4_amip_r1i1p1f1_gr1_*nc")
+
+;infile_obs="/Users/silvers/data/obs/clMISR_obs4MIPS_20000601_20130531_tmn.nc"
+infile_obs=to_misr+"clMISR_obs4MIPs_200003th201911.timemn.nc"
+
+maintitle_top="MISR cloud fraction for thick clouds"
+maintitle_bot="MISR cloud fraction for thin clouds"
+
+;a = addfile(infile,"r")
+a = addfiles(infile,"r")
+m_obs = addfile(infile_obs,"r")
 
 ;
-print("infile for am4 data is: "+infile)
-print("infile for misr observations is: "+infile_obs)
+  print("infile for am4 data is: "+infile)
+  print("infile for misr observations is: "+infile_obs)
 ;
 
 ; define variable names to read from files
-  var2read="clmisr"
-  var_obs="clMISR"
+var2read="clmisr"
+var_obs="clMISR"
 
-  cfrac_total  = a->$var2read$(:,:,:,:,:) ; for thin clouds (0.3:1.3) 
+cfrac_total = a[:]->$var2read$(:,:,:,:,:) ; for thin clouds (0.3:1.3) 
 ;
 ; tau limits
 ; height limits (recall there are 16 levels)
 z_bot=0
-z_top=7
+z_top=6 ; i think z_top=6 corresponds to the height of 3km
 
-print("dimsizes of am4 incoming data is: "+dimsizes(cfrac_total))
-  cfrac_thin  = a->$var2read$(:,1:2,z_bot:z_top,:,:) ; for thin clouds (0.3:1.3) 
-  cfrac_thick = a->$var2read$(:,3:4,z_bot:z_top,:,:) ; for thicker clouds (3.6:60)      
-  cfrac_full  = a->$var2read$(:,:,:,:,:) ; for thin clouds (0.3:1.3) 
+  print("dimsizes of am4 incoming data is: "+dimsizes(cfrac_total))
+cfrac_thin  = a[:]->$var2read$(:,1:2,z_bot:z_top,:,:) ; for thin clouds (0.3:1.3) 
+cfrac_thick = a[:]->$var2read$(:,3:4,z_bot:z_top,:,:) ; for thicker clouds (3.6:60)      
+cfrac_full  = a[:]->$var2read$(:,:,:,:,:) ; for thin clouds (0.3:1.3) 
 
 ;
 
@@ -308,7 +317,7 @@ cfrac_am4_thick_oc=where(cfrac_thin_misr.eq.cfrac_thin_misr@_FillValue,cfrac_thi
 ;
 ;;***********************************************************************************
 ;; compute global mean values and biases
-  lat  = a->lat ; get latitude from am4 data
+  lat  = a[0]->lat ; get latitude from am4 data
   rad  = 4.0*atan(1.0)/180.0
   clat = cos(lat*rad)
 ;
@@ -383,7 +392,7 @@ print("weighted average of thick misr clouds: "+obs_cfmisr_tck_weighted_ave)
 
   res@lbLabelFontHeightF  = 0.015           ; label bar font height
 
-  res@tiMainString       = "AM4 MISR sim thick (tau 3.6:23)"; add a title
+  res@tiMainString       = "AM4 MISR thick (tau 3.6:23)"; add a title
   res@tiMainFontHeightF  = .018                               ; font height
 
   ;plot(0) = gsn_csm_contour_map(wks,cfrac_plot_am4_thick,res)  ; create the plot
@@ -393,7 +402,7 @@ print("dimensions of am4 cfrac sum over z time and tau are: "+dimsizes(cfrac_tmn
 print("dimensions of misr cfrac sum over z and tau are: "+dimsizes(cfrac_thin_misr))
 
 
-  res@tiMainString       = "AM4 MISR sim thin (tau 0.3:3.6)"; add a title
+  res@tiMainString       = "AM4 MISR thin (tau 0.3:3.6)"; add a title
   ;plot(1) = gsn_csm_contour_map(wks,cfrac_tmn_totz_thin,res)  ; create the plot
   plot(1) = gsn_csm_contour_map(wks,cfrac_am4_thin_oc,res)  ; create the plot
 ;  am4_cfmisr_thin_oc_whted_ave    = wgt_areaave(cfrac_am4_thin_oc,clat,1.0,0)
@@ -406,7 +415,7 @@ print("dimensions of misr cfrac sum over z and tau are: "+dimsizes(cfrac_thin_mi
 
   resP                         = True
   resP@txString                = " " 
-  resP@txString                = "MISR simulator AM4.0"
+;  resP@txString                = "MISR simulator AM4.0"
   resP@gsnPanelLabelBar        = True
   resP@lbLabelFontHeightF      = 0.012
 
