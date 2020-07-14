@@ -9,6 +9,12 @@
 ; as cloud top height (km) vs. tau using output from
 ; the misr simulator
 ;
+; a number of switches can be set to determine the plot output
+; plot_cfvheight is only relevent when plot_cloudtable = False
+;  plot_cloudtable
+;  plot_map
+;  plot_cfvheight; when True, cloud frac vs height, otherwise cloud frac vs tau
+;
 ; there is also code at the end that when uncommented can 
 ; produce global maps...
 ;
@@ -105,6 +111,7 @@ begin
 ; switches---------------------------------------------------------------
 plot_cloudtable  = True
 plot_map         = False
+plot_cfvheight   = False
 
 ; these deterimine what vertical levels are used for some of the averaging.
 ; for 'normal' behavior these should represent the full vert extent. 
@@ -113,15 +120,22 @@ dom_top=15
 ;------------------------------------------------------------------------
 
 ;
+; old path from archive
 ;;;filein="/archive/Levi.Silvers/data/c96L32_am4G12r16_2010climo_new_cosp/atmos_month_misr/atmos_month_misr.0002-0011.alltmn_wavg.nc"
 
+; read all clmisr AM4 data
 filein=systemfunc("ls /Users/silvers/data/cfmip_clouds/clmisr_Emon_GFDL-CM4_amip_r1i1p1f1_gr1_*nc")
-;filein="/Users/silvers/data/cfmip_clouds/clmisr_Emon_GFDL-CM4_amip_r1i1p1f1_gr1_200301-200812.nc"
-;obs_filein="/Users/silvers/data/cfmip_clouds/clmisr_Emon_GFDL-CM4_amip_r1i1p1f1_gr1_197901-198412.nc"
 
+; read only clmisr AM4 data from 2003 through 2008
+;filein="/Users/silvers/data/cfmip_clouds/clmisr_Emon_GFDL-CM4_amip_r1i1p1f1_gr1_200301-200812.nc"
+
+; old observation data
+;obs_filein="/Users/silvers/data/cfmip_clouds/clmisr_Emon_GFDL-CM4_amip_r1i1p1f1_gr1_197901-198412.nc"
+;obs_filein="/Users/silvers/data/SatData/MISR/clMISR/clMISR_obs4MIPS_20000601_20130531_tmn.nc"
+
+; newer obs data from Roger Marchand:
 to_misr="/Users/silvers/data/SatData/MISR_fromRoj/MISR_CTH_OD_histograms_v7/"
 
-;obs_filein="/Users/silvers/data/SatData/MISR/clMISR/clMISR_obs4MIPS_20000601_20130531_tmn.nc"
 obs_filein=to_misr+"clMISR_obs4MIPs_200003th201911.timemn.nc"
 
 ;infile     = addfile(filein,"r")
@@ -142,8 +156,9 @@ tau_obs=obs_infile->tau(:)
 vaxis1=infile[0]->alt16(:)
 ;vaxis1=obs_infile->cth(:)
 
-vaxis2=infile[0]->tau(:)
-
+;vaxis2=infile[0]->tau(:)
+vaxis2=new((/7,1/),float)
+vaxis2=(/0,1,2,3,4,5,6/)
 ;;-Reading and processing of data-------------------------------------------
 ;
 
@@ -742,8 +757,15 @@ else  ; plot profiles instead of the full cloud table
 ;------
   wks = gsn_open_wks("eps","lostplot")
   plot = new(1,graphic)
-  xtitle = "CF (%)"
-  ytitle = "height (km)"
+  ;plot_cfvheight = True
+
+  if (plot_cfvheight) then
+    xtitle = "Cloud Fraction (%)"
+    ytitle = "height (km)"
+  else
+    xtitle = "Cloud Optical Depth (tau)"
+    ytitle = "Cloud Fraction (%)"
+  end if
 
   res                   = True
   res@tiMainString      = titleProf
@@ -755,11 +777,16 @@ else  ; plot profiles instead of the full cloud table
   res@tmXTBorderOn      = False
   res@tiXAxisString     = xtitle
   res@tiYAxisString     = ytitle
-  res@vpWidthF          = 0.4
-  res@vpHeightF         = 0.7
+  res@vpWidthF          = 0.45
+  res@vpHeightF         = 0.45
   res@xyLineThicknessF  = 2.0
-  res@trXMinF           = 0.0
-  res@trXMaxF           = 15.0
+  if (plot_cfvheight) then
+    res@trXMinF           = 0.0
+    res@trXMaxF           = 15.0
+  else
+    res@trYMinF           = 0.0
+    res@trYMaxF           = 20.0
+  end if
 
   ; plot profiles of cloud fraction as function of height or optical depth
   ; blabichra and mij 
@@ -770,14 +797,27 @@ else  ; plot profiles instead of the full cloud table
     print("archibald: "+dimsizes(mij))
     print("mij: "+dimsizes(vaxis2))
     print("jim: "+dimsizes(jim))
-  res@xyDashPattern = 16 
-  plot_am4  = gsn_csm_xy(wks,blabichra(:),vaxis1(:)/1000,res)
-  res@xyDashPattern = 0
-  plot_obs  = gsn_csm_xy(wks,mij(:),vaxis1(:)/1000,res)
-  ; 
-  ;  plot_am4  = gsn_csm_xy(wks,mij,vaxis2,res)
-  ;  plot_obs  = gsn_csm_xy(wks,jim,vaxis2,res)
 
+  if (plot_cfvheight) then
+    res@xyDashPattern = 16 
+    plot_am4  = gsn_csm_xy(wks,blabichra(:),vaxis1(:)/1000,res)
+    res@xyDashPattern = 0
+    plot_obs  = gsn_csm_xy(wks,mij(:),vaxis1(:)/1000,res)
+  else 
+    ;res@tmYLValues              = fspan(row_width,1.-row_width,nrows-1)
+    ;res@tmYLLabels              = nrow_labels
+    res@tmXBMode                = "Explicit"
+    res@trXMinF           = 0.0
+    res@trXMaxF           = 7.0
+    res@tmXBValues              = (/0.0,1.0,2.0,3.0,4.0,5.0,6.0/)
+    ;res@tmXBLabels              = (/0.0,0.3,1.3,3.6,9.4,23,60/)
+    res@tmXBLabels              = (/0.15,0.8,2.45,6.5,16.2,41.5,100/)
+    ;ncol_labels_b=(/"0.3","1.3","3.6","9.4","23","60"," "/)
+    res@xyDashPattern = 16 
+    plot_am4  = gsn_csm_xy(wks,vaxis2(:,0),archibald(:),res)
+    res@xyDashPattern = 0
+    plot_obs  = gsn_csm_xy(wks,vaxis2(:,0),jim(:),res)
+  end if
   overlay(plot_am4,plot_obs)
   plot       = plot_am4
   respanel   = True
