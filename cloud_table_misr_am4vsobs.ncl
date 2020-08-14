@@ -135,7 +135,6 @@ filein=systemfunc("ls /Users/silvers/data/cfmip_clouds/clmisr_Emon_GFDL-CM4_amip
 
 ; newer obs data from Roger Marchand:
 to_misr="/Users/silvers/data/SatData/MISR_fromRoj/MISR_CTH_OD_histograms_v7/"
-
 obs_filein=to_misr+"clMISR_obs4MIPs_200003th201911.timemn.nc"
 
 ;infile     = addfile(filein,"r")
@@ -424,7 +423,7 @@ field_am4_nh30t60       = wgt_areaave(fields_am4_nh30t60,nhlat30to60,1.0,0)
 ; define which region to tabulate and set titles...
 ;----------------------------------------------------
 
-DomainOfInterest=0
+DomainOfInterest=4
 
 if (DomainOfInterest .lt. 1) then  ; default is 0 and plots global
     print("!!!!! plotting Global mean data !!!!!")
@@ -646,7 +645,6 @@ if(plot_cloudtable) then
     ncol_labels_b=(/"0.3","1.3","3.6","9.4","23","60"," "/)
     ncol_labels_t=(/" "," "," "," "," "," "," "/)
     nrow_labels=(/0.0,0.5,1.0,1.5,2.0,2.5,3.0,4.0,5.0,7.0,9.0,11.0,13.0,15.0,17.0/)
-    ;nrow_labels=(/0.25,0.75,1.25,1.75,2.25,2.75,3.5,4.5,6.0,8.0,10.0,12.0,14.5,16.0,18.0/)
   ; alt16 = 0, 250, 750, 1250, 1750, 2250, 2750, 3500, 4500, 6000, 8000, 10000,
   ;    12000, 14500, 16000, 18000 ;
     resb@tmXBLabels              = ncol_labels_t
@@ -661,9 +659,6 @@ if(plot_cloudtable) then
     resb@tiYAxisString           = "km"
     resb@tiXAxisString           = "Tau "
   ;
-  ; The Y labels need to be reversed, because the label in the first
-  ; row in the ASCII file is associated with the top of the plot.
-    ;resb@tmYLLabels              = nrow_labels(::-1)
     resb@tmYLLabelFontHeightF    = 0.015            ; Make font a little smaller
   
   ; Rotate the X axis labels 90 degrees.
@@ -682,7 +677,6 @@ if(plot_cloudtable) then
   ;
   ; Get position and size of the blank plot so we can
   ; be sure to draw the table in same location.
-  ;
     getvalues blank
       "vpXF"      : vpx
       "vpYF"      : vpy
@@ -742,12 +736,12 @@ if(plot_cloudtable) then
     y = (/vpy-vph,vpy/)
   
 ;  ; Set up resources for table
-;    rest               = True
-;    ;rest@tiXAxisString    = xtitle
-;    ;rest@tiYAxisString    = ytitle
-;    rest@gsLineColor   = -1                ; No border lines
-;    rest@gsFillColor   = obs_cols_for_vals     ; Each cell of table
-;    rest@txFontColor   = obs_cols_for_txt
+    rest               = True
+    ;rest@tiXAxisString    = xtitle
+    ;rest@tiYAxisString    = ytitle
+    rest@gsLineColor   = -1                ; No border lines
+    rest@gsFillColor   = obs_cols_for_vals     ; Each cell of table
+    rest@txFontColor   = obs_cols_for_txt
   
 ;    rest@txFontHeightF = 0.015             ; Size of centered text
   
