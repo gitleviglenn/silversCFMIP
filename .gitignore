@@ -1,5 +1,6 @@
 *.eps
 *.pdf
+*.gz
 testplot*
 *log
 *aux

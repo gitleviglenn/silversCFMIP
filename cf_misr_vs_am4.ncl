@@ -2,8 +2,6 @@
 ; cf_misr_vs_am4.ncl
 ;***********************************************************************************
 ;
-; still need to use all the am4 data, not just 5 years
-;
 ; plot global cloud fraction from both the misr satellite simulator and from
 ; the misr observations.
 ;
@@ -24,6 +22,9 @@
 ;
 ; data from gfdl is on a 180x288 grid while observational data from 
 ; misr is on a 180x360 grid so we need to interpolate the gfdl data to 180x360
+;
+; we interpolate to the same grid so that the land-sea mask in the MISR observations
+; can be used to mask the AM4 data...
 ;
 ; the longitude dimensions for the am4 data and the misr observations are not
 ; lined up with each other.  
@@ -73,28 +74,25 @@ m_obs = addfile(infile_obs,"r")
 ;
   print("infile for am4 data is: "+infile)
   print("infile for misr observations is: "+infile_obs)
-;
 
 ; define variable names to read from files
 var2read="clmisr"
 var_obs="clMISR"
 
 cfrac_total = a[:]->$var2read$(:,:,:,:,:) ; for thin clouds (0.3:1.3) 
-;
-; tau limits
 ; height limits (recall there are 16 levels)
 z_bot=0
-z_top=6 ; i think z_top=6 corresponds to the height of 3km
+z_top=6 ; z_top=6 should correspond to the height of 3km
 
   print("dimsizes of am4 incoming data is: "+dimsizes(cfrac_total))
 cfrac_thin  = a[:]->$var2read$(:,1:2,z_bot:z_top,:,:) ; for thin clouds (0.3:1.3) 
-cfrac_thick = a[:]->$var2read$(:,3:4,z_bot:z_top,:,:) ; for thicker clouds (3.6:60)      
+cfrac_thick = a[:]->$var2read$(:,3:6,z_bot:z_top,:,:) ; for thicker clouds (3.6:60)      
 cfrac_full  = a[:]->$var2read$(:,:,:,:,:) ; for thin clouds (0.3:1.3) 
 
 ;
 
   cfrac_misr_thin  = m_obs->$var_obs$(0,1:2,z_bot:z_top,:,:) ; for thin clouds      
-  cfrac_misr_thick = m_obs->$var_obs$(0,3:5,z_bot:z_top,:,:) ; for thicker clouds      
+  cfrac_misr_thick = m_obs->$var_obs$(0,3:6,z_bot:z_top,:,:) ; for thicker clouds      
   ;cfrac_misr_thick = m_obs->$var_obs$(0,3:4,z_bot:z_top,:,:) ; for thicker clouds      
   ;cfrac_misr_thick = m_obs->$var_obs$(0,:,z_bot:z_top,:,:) ; for thicker clouds      
 ;  cfrac_misr_all = m_obs->$var_obs$(:,:,:,:,:) ; for thicker clouds      
@@ -392,7 +390,7 @@ print("weighted average of thick misr clouds: "+obs_cfmisr_tck_weighted_ave)
 
   res@lbLabelFontHeightF  = 0.015           ; label bar font height
 
-  res@tiMainString       = "AM4 MISR thick (tau 3.6:23)"; add a title
+  res@tiMainString       = "AM4 MISR thick"; (tau 3.6:23)"; add a title
   res@tiMainFontHeightF  = .018                               ; font height
 
   ;plot(0) = gsn_csm_contour_map(wks,cfrac_plot_am4_thick,res)  ; create the plot
@@ -402,15 +400,15 @@ print("dimensions of am4 cfrac sum over z time and tau are: "+dimsizes(cfrac_tmn
 print("dimensions of misr cfrac sum over z and tau are: "+dimsizes(cfrac_thin_misr))
 
 
-  res@tiMainString       = "AM4 MISR thin (tau 0.3:3.6)"; add a title
+  res@tiMainString       = "AM4 MISR thin"; (tau 0.3:3.6)"; add a title
   ;plot(1) = gsn_csm_contour_map(wks,cfrac_tmn_totz_thin,res)  ; create the plot
   plot(1) = gsn_csm_contour_map(wks,cfrac_am4_thin_oc,res)  ; create the plot
 ;  am4_cfmisr_thin_oc_whted_ave    = wgt_areaave(cfrac_am4_thin_oc,clat,1.0,0)
   ;plot(2) = gsn_csm_contour_map(wks,cfrac_plot_misr_thick,res)  ; create the plot
-  res@tiMainString       = "MISR thick (tau 3.6:23)"; add a title
+  res@tiMainString       = "MISR thick"; (tau 3.6:23)"; add a title
   plot(2) = gsn_csm_contour_map(wks,cfrac_thick_misr,res)  ; create the plot
   ;plot(3) = gsn_csm_contour_map(wks,cfrac_plot_misr_thin,res)  ; create the plot
-  res@tiMainString       = "MISR thin (tau 0.3:3.6)"; add a title
+  res@tiMainString       = "MISR thin"; (tau 0.3:3.6)"; add a title
   plot(3) = gsn_csm_contour_map(wks,cfrac_thin_misr,res)  ; create the plot
 
   resP                         = True
