@@ -18,8 +18,8 @@
 ; the temperature change of the air near the surface is not exactly 4K but:
 ; delT_amip_fut = 4.6816
 ; delT_amip_p4K = 4.4938
-; delT_amip_m4K = 4.5217
-; delT_aqua     = 4.1391
+; delT_amip_m4K = 4.5217 ; verified in this script
+; delT_aqua     = 4.1391 ; verified in this script;  why isn't this exactly 4K?  
 ;
 ; levi silvers                                            june 2020
 ;-------------------------------------------------------------------------
@@ -34,7 +34,7 @@ path_obs="/Users/silvers/data/SatData/CERES/"
 ; everything = 2; plotbias = 0 --> Panel on far right showing amip type feedback experiments
 
 
-everything = 2 ; switch defining which profiles are plotted
+everything = 0 ; switch defining which profiles are plotted
 ; 0 plots the CRE from: ceres, amip, historical, abrupt, and 1pct
 ; 1 plots the shortwave, longwave, and net CRE for amip and aqua
 ; 2 plots CRE Feedback figure showing aqua and amip-based warming experiments
@@ -62,13 +62,16 @@ warm_yrs=late
 ;  as originally written, the historical files over the later periods cover 65 
 ;  years, which is 780 months. i want to grab the last 228 of them.  
 lastmonth=779
-timeper=228
-firstmonth=lastmonth-timeper-1  
+timeper1=228 ;228 = 19 years
+;timeper1=777
+firstmonth=lastmonth-timeper1-1  
 ;
 ; since amip starts in 1979, the range is different...
-; 432 months
+; 432 months is 36 years
 lastmonth_amip = 431
-firstmonth_amip=lastmonth_amip-timeper-1  
+timeper2=timeper1
+;timeper2=430 ;228 = 19 years
+firstmonth_amip=lastmonth_amip-timeper2-1  
 ;-------------------------------------------------------------------------
 ; define variables borrowed from the matlab scripts: 
 delT_amip_fut = 4.6816
@@ -91,16 +94,21 @@ filename="atmos_cmip.197901-201412.rlutcs.nc"
 infile4=path+filename
 filename="atmos_cmip.197901-201412.rsdt.nc"
 infile5=path+filename
+filename="tas_Amon_GFDL-AM4_amip_r1i1p1f1_gr1_198001-201412.nc"
+;filename="atmos_cmip.197901-201412.tas.nc"
+infile6=path+filename
 
-print("infile1 is: "+infile1)
+  print("infile1 is: "+infile1)
 
 ; ceres data paths: 
 filename="CERES_EBAF-TOA_Ed2.8_Subset_200003-201607.nc"
 filename_4p1="CERES_EBAF_Ed4.1_Subset_200003-201809.nc"
 infile_obs=path_obs+filename
 infile_obs_4p1=path_obs+filename_4p1
-print("infile_obs ceres v2.8 is: "+infile_obs)
-print("infile_obs_4p1 ceres v4.1 is: "+infile_obs_4p1)
+  print("infile_obs ceres v2.8 is: "+infile_obs)
+  print("infile_obs_4p1 ceres v4.1 is: "+infile_obs_4p1)
+
+crs = addfile(infile_obs,"r")
 
 ; read data
 add_rsut=addfile(infile1,"r")
@@ -113,6 +121,24 @@ add_rlutcs=addfile(infile4,"r")
 amip_rlutcs=add_rlutcs->rlutcs(firstmonth_amip:lastmonth_amip,:,:)
 add_rsdt=addfile(infile5,"r")
 amip_rsdt=add_rsdt->rsdt(firstmonth_amip:lastmonth_amip,:,:)
+add_tas=addfile(infile6,"r")
+amip_tas=add_tas->tas(:,:,:)
+
+; compute time average of tas
+amip_tas_tmn=dim_avg_n(amip_tas,0)
+
+; compute weighted global mean of tas
+; =0=-0=-0=-0=-0=0=-0=-0=-0=-0=-0=-0=-0-=0=
+latam      = add_tas->lat
+rad      = 4.0*atan(1.0)/180.0
+clatam     = cos(latam*rad)
+
+amip_tas_wave=wgt_areaave(amip_tas_tmn,clatam,1.0,0)
+
+;  print("=0=-0=-0=-0=-0=0=-0=-0=-0=-0=-0=-0=-0-=0=")
+;  print("weighted mean of amip over particular years is: "+amip_tas_wave)
+;  print("=0=-0=-0=-0=-0=0=-0=-0=-0=-0=-0=-0=-0-=0=")
+; =0=-0=-0=-0=-0=0=-0=-0=-0=-0=-0=-0=-0-=0=
 
 ;-------------------------------------------------------------------------
 ; piControl
@@ -121,18 +147,16 @@ amip_rsdt=add_rsdt->rsdt(firstmonth_amip:lastmonth_amip,:,:)
 ; define filenames
 filename="rsut_Amon_GFDL-CM4_piControl_r1i1p1f1_gr1_025101-035012.nc"
 infile_pic_1=path+filename
-;filename="atmos_cmip.197901-201412.rsutcs.nc"
 filename="rsutcs_Amon_GFDL-CM4_piControl_r1i1p1f1_gr1_025101-035012.nc"
 infile_pic_2=path+filename
 filename="rlut_Amon_GFDL-CM4_piControl_r1i1p1f1_gr1_025101-035012.nc"
-;filename="atmos_cmip.197901-201412.rlut.nc"
 infile_pic_3=path+filename
 filename="rlutcs_Amon_GFDL-CM4_piControl_r1i1p1f1_gr1_025101-035012.nc"
-;filename="atmos_cmip.197901-201412.rlutcs.nc"
 infile_pic_4=path+filename
 filename="rsdt_Amon_GFDL-CM4_piControl_r1i1p1f1_gr1_025101-035012.nc"
-;filename="atmos_cmip.197901-201412.rsdt.nc"
 infile_pic_5=path+filename
+filename="tas_Amon_GFDL-CM4_piControl_r1i1p1f1_gr1_025101-035012.nc"
+infile_pic_6=path+filename
 
 ; read data
 add_rsut=addfile(infile_pic_1,"r")
@@ -145,51 +169,80 @@ add_rlutcs=addfile(infile_pic_4,"r")
 pic_rlutcs=add_rlutcs->rlutcs(:,:,:)
 add_rsdt=addfile(infile_pic_5,"r")
 pic_rsdt=add_rsdt->rsdt(:,:,:)
+add_tas=addfile(infile_pic_6,"r")
+pic_tas=add_tas->tas(:,:,:)
 
 ;-------------------------------------------------------------------------
 
-
+; preparation for cosine weighted global mean averages...
 latitude=add_rsut->lat(:)
 
-;----------- average data
+lat      = crs->lat
+rad      = 4.0*atan(1.0)/180.0
+clat     = cos(lat*rad)
+clat_am4 = cos(latitude*rad)
+
+
+;----------- average data   
 amip_rsut_tmn=dim_avg_n(amip_rsut,0)
+amip_rsut_tgmn=wgt_areaave(amip_rsut_tmn,clat_am4,1.0,0)
 amip_rsut_tzmn=dim_avg_n(amip_rsut_tmn,1)
 
 amip_rsutcs_tmn=dim_avg_n(amip_rsutcs,0)
+amip_rsutcs_tgmn=wgt_areaave(amip_rsutcs_tmn,clat_am4,1.0,0)
 amip_rsutcs_tzmn=dim_avg_n(amip_rsutcs_tmn,1)
 
 amip_rlut_tmn=dim_avg_n(amip_rlut,0)
+amip_rlut_tgmn=wgt_areaave(amip_rlut_tmn,clat_am4,1.0,0)
 amip_rlut_tzmn=dim_avg_n(amip_rlut_tmn,1)
 
 amip_rlutcs_tmn=dim_avg_n(amip_rlutcs,0)
+amip_rlutcs_tgmn=wgt_areaave(amip_rlutcs_tmn,clat_am4,1.0,0)
 amip_rlutcs_tzmn=dim_avg_n(amip_rlutcs_tmn,1)
 
 amip_rsdt_tmn=dim_avg_n(amip_rsdt,0)
+amip_rsdt_tgmn=wgt_areaave(amip_rsdt_tmn,clat_am4,1.0,0)
 amip_rsdt_tzmn=dim_avg_n(amip_rsdt_tmn,1)
 
 pic_rsut_tmn=dim_avg_n(pic_rsut,0)
+pic_rsut_tgmn=wgt_areaave(pic_rsut_tmn,clat_am4,1.0,0)
 pic_rsut_tzmn=dim_avg_n(pic_rsut_tmn,1)
 
 pic_rsutcs_tmn=dim_avg_n(pic_rsutcs,0)
+pic_rsutcs_tgmn=wgt_areaave(pic_rsutcs_tmn,clat_am4,1.0,0)
 pic_rsutcs_tzmn=dim_avg_n(pic_rsutcs_tmn,1)
 
 pic_rlut_tmn=dim_avg_n(pic_rlut,0)
+pic_rlut_tgmn=wgt_areaave(pic_rlut_tmn,clat_am4,1.0,0)
 pic_rlut_tzmn=dim_avg_n(pic_rlut_tmn,1)
 
 pic_rlutcs_tmn=dim_avg_n(pic_rlutcs,0)
+pic_rlutcs_tgmn=wgt_areaave(pic_rlutcs_tmn,clat_am4,1.0,0)
 pic_rlutcs_tzmn=dim_avg_n(pic_rlutcs_tmn,1)
 
 pic_rsdt_tmn=dim_avg_n(pic_rsdt,0)
+pic_rsdt_tgmn=wgt_areaave(pic_rsdt_tmn,clat_am4,1.0,0)
 pic_rsdt_tzmn=dim_avg_n(pic_rsdt_tmn,1)
 
-print("dimensions of amip_rsut are: "+dimsizes(amip_rsut))
-print("dimensions of pic_rsut are:  "+dimsizes(pic_rsut))
+pic_tas_tmn=dim_avg_n(pic_tas,0)
+pic_tas_tgmn=wgt_areaave(pic_tas_tmn,clat_am4,1.0,0)
+;  print("global time mean of tas of PICONTROL is: "+pic_tas_tgmn)
+;  print("dimensions of amip_rsut are: "+dimsizes(amip_rsut))
+;  print("dimensions of pic_rsut are:  "+dimsizes(pic_rsut))
 
 ;------------ calculate CRE: cloud radiative effect
 ; for amip
 cre_lw_amip=amip_rlut_tzmn-amip_rlutcs_tzmn
 cre_sw_amip=amip_rsut_tzmn-amip_rsutcs_tzmn
 cre_net_amip=cre_sw_amip+cre_lw_amip
+
+; for cosine weighted global time mean values...
+cre_lw_amip_gmn=amip_rlut_tgmn-amip_rlutcs_tgmn
+cre_sw_amip_gmn=amip_rsut_tgmn-amip_rsutcs_tgmn
+cre_net_amip_tgmn=cre_sw_amip_gmn+cre_lw_amip_gmn
+
+;  print("dimsizes of amip_rlut_tzmn are: "+dimsizes(amip_rlut_tzmn))
+;  print("dimsizes of cre_net_amip are: "+dimsizes(cre_net_amip))
 
 cre_lw_amip_tmn =amip_rlut_tmn-amip_rlutcs_tmn
 cre_sw_amip_tmn  =amip_rsut_tmn-amip_rsutcs_tmn
@@ -256,7 +309,7 @@ cre_net_pic_tmn&lon=pic_rsut&lon
 ;---------------------------------------------------------------------
 ; ceres data read below
 ;---------------------------------------------------------------------
-  crs = addfile(infile_obs,"r")
+;  crs = addfile(infile_obs,"r")
 varname1="toa_cre_sw_mon"
 varname2="toa_cre_lw_mon"
 varname3="toa_cre_net_mon"
@@ -298,22 +351,6 @@ ceres_4p1_cre=ceres_lw_cre_tmn+ceres_sw_cre_tmn
 ceres_2p8_cre_ztmn=dim_avg_n(ceres_2p8_cre,1)
 ceres_4p1_cre_ztmn=dim_avg_n(ceres_4p1_cre,1)
 
-;;-------------------------------------------------------------------------
-;; compute global mean values of data from ceres and am4
-;;-------------------------------------------------------------------------
-;lat      = crs->lat
-;latitude = crs->lat
-;rad      = 4.0*atan(1.0)/180.0
-;clat     = cos(lat*rad)
-;
-;ceres_2p8_ave=wgt_areaave(ceres_2p8_cre,clat,1.0,0)
-;ceres_4p1_ave=wgt_areaave(ceres_4p1_cre,clat,1.0,0)
-;
-;print("mean of ceres 2p8: "+dim_avg_n(ceres_2p8_cre_ztmn,0))
-;print("w mean of ceres 2p8: "+ceres_2p8_ave)
-;print("mean of ceres 4p1: "+dim_avg_n(ceres_4p1_cre_ztmn,0))
-;print("w mean of ceres 4p1: "+ceres_4p1_ave)
-;;printVarSummary(var_to_interpolate)
 ;-------------------------------------------------------------------------
 ; for amip m4K
 ;-------------------------------------------------------------------------
@@ -327,6 +364,8 @@ filename="rlutcs_Amon_GFDL-CM4_amip-m4K_r1i1p1f1_gr1_197901-201412.nc"
 infile4=path+filename
 filename="rsdt_Amon_GFDL-CM4_amip-m4K_r1i1p1f1_gr1_197901-201412.nc"
 infile5=path+filename
+filename="tas_Amon_GFDL-CM4_amip-m4K_r1i1p1f1_gr1_197901-201412.nc"
+infile6=path+filename
 
 print("infile1 is: "+infile1)
 
@@ -341,6 +380,8 @@ add_rlutcs_m4K=addfile(infile4,"r")
 amip_rlutcs_m4K=add_rlutcs_m4K->rlutcs(:,:,:)
 add_rsdt_m4K=addfile(infile5,"r")
 amip_rsdt_m4K=add_rsdt_m4K->rsdt(:,:,:)
+add_tas_m4K=addfile(infile6,"r")
+amip_tas_m4K=add_tas_m4K->tas(:,:,:)
 
 ; average data
 amip_rsut_m4K_tmn=dim_avg_n(amip_rsut_m4K,0)
@@ -353,6 +394,18 @@ amip_rlutcs_m4K_tmn=dim_avg_n(amip_rlutcs_m4K,0)
 amip_rlutcs_m4K_tzmn=dim_avg_n(amip_rlutcs_m4K_tmn,1)
 amip_rsdt_m4K_tmn=dim_avg_n(amip_rsdt_m4K,0)
 amip_rsdt_m4K_tzmn=dim_avg_n(amip_rsdt_m4K_tmn,1)
+amip_tas_m4K_tmn=dim_avg_n(amip_tas_m4K,0)
+
+; =0=-0=-0=-0=-0=0=-0=-0=-0=-0=-0=-0=-0-=0=
+amip_tas_m4K_wave=wgt_areaave(amip_tas_m4K_tmn,clatam,1.0,0)
+
+delT_m4K=amip_tas_wave-amip_tas_m4K_wave
+
+  print("=0=-0=-0=-0=-0=0=-0=-0=-0=-0=-0=-0=-0-=0=")
+  print("weighted mean of amip m4K 1979-2014 is: "+amip_tas_m4K_wave)
+  print("del T for amip m4K is: "+delT_m4K)
+  print("=0=-0=-0=-0=-0=0=-0=-0=-0=-0=-0=-0=-0-=0=")
+; =0=-0=-0=-0=-0=0=-0=-0=-0=-0=-0=-0=-0-=0=
 
 ;print("dimensions of amip_rsut_m4k are: "+dimsizes(amip_rsut_m4K))
 ;print("dimensions of amip_rsut_m4k_tmn are: "+dimsizes(amip_rsut_m4K_tmn))
@@ -492,14 +545,23 @@ amip_rsdt_future4K=add_rsdt_future4K->rsdt(:,:,:)
 
 ; average data
 amip_rsut_future4K_tmn=dim_avg_n(amip_rsut_future4K,0)
+amip_rsut_future4K_tgmn=wgt_areaave(amip_rsut_future4K_tmn,clat_am4,1.0,0)
 amip_rsut_future4K_tzmn=dim_avg_n(amip_rsut_future4K_tmn,1)
+
 amip_rsutcs_future4K_tmn=dim_avg_n(amip_rsutcs_future4K,0)
+amip_rsutcs_future4K_tgmn=wgt_areaave(amip_rsutcs_future4K_tmn,clat_am4,1.0,0)
 amip_rsutcs_future4K_tzmn=dim_avg_n(amip_rsutcs_future4K_tmn,1)
+
 amip_rlut_future4K_tmn=dim_avg_n(amip_rlut_future4K,0)
+amip_rlut_future4K_tgmn=wgt_areaave(amip_rlut_future4K_tmn,clat_am4,1.0,0)
 amip_rlut_future4K_tzmn=dim_avg_n(amip_rlut_future4K_tmn,1)
+
 amip_rlutcs_future4K_tmn=dim_avg_n(amip_rlutcs_future4K,0)
+amip_rlutcs_future4K_tgmn=wgt_areaave(amip_rlutcs_future4K_tmn,clat_am4,1.0,0)
 amip_rlutcs_future4K_tzmn=dim_avg_n(amip_rlutcs_future4K_tmn,1)
+
 amip_rsdt_future4K_tmn=dim_avg_n(amip_rsdt_future4K,0)
+amip_rsdt_future4K_tgmn=wgt_areaave(amip_rsdt_future4K_tmn,clat_am4,1.0,0)
 amip_rsdt_future4K_tzmn=dim_avg_n(amip_rsdt_future4K_tmn,1)
 ;
 ; calculate CRE: cloud radiative effect
@@ -510,6 +572,11 @@ cre_net_amip_future4K=cre_sw_amip_future4K+cre_lw_amip_future4K
 cre_lw_amip_future4K_tmn =amip_rlut_future4K_tmn-amip_rlutcs_future4K_tmn
 cre_sw_amip_future4K_tmn  =amip_rsut_future4K_tmn-amip_rsutcs_future4K_tmn
 cre_net_amip_future4K_tmn =cre_sw_amip_future4K_tmn+cre_lw_amip_future4K_tmn
+
+; compute global time mean cre
+cre_lw_amip_future4K_tgmn =amip_rlut_future4K_tgmn-amip_rlutcs_future4K_tgmn
+cre_sw_amip_future4K_tgmn =amip_rsut_future4K_tgmn-amip_rsutcs_future4K_tgmn
+cre_net_amip_future4K_tgmn =cre_sw_amip_future4K_tgmn+cre_lw_amip_future4K_tgmn
 
 cre_lw_amip_future4K!0="lat"
 cre_lw_amip_future4K&lat=amip_rsut_future4K&lat
@@ -547,7 +614,8 @@ filename="rlutcs_Amon_GFDL-CM4_historical_r1i1p1f1_gr1_"+hist_yrs+".nc"
 infile4=path+filename
 filename="rsdt_Amon_GFDL-CM4_historical_r1i1p1f1_gr1_"+hist_yrs+".nc"
 infile5=path+filename
-;
+filename="tas_Amon_GFDL-CM4_historical_r1i1p1f1_gr1_"+hist_yrs+".nc"
+infile6=path+filename
 ;
 ;; read data
 add_rsut_historical=addfile(infile1,"r")
@@ -560,12 +628,15 @@ add_rlutcs_historical=addfile(infile4,"r")
 h2_rlutcs_historical=add_rlutcs_historical->rlutcs(firstmonth:lastmonth,:,:)
 add_rsdt_historical=addfile(infile5,"r")
 h2_rsdt_historical=add_rsdt_historical->rsdt(firstmonth:lastmonth,:,:)
+add_tas_historical=addfile(infile6,"r")
+h2_tas_historical=add_tas_historical->tas(firstmonth:lastmonth,:,:)
 ;
 print("!@#$Q$#^#$^%&$^*")
 print("Years? one of the historical files is: "+infile2)
 print("!@#$Q$#^#$^%&$^*")
 ;
 ;; average data
+h2_tas_historical_tmn=dim_avg_n(h2_tas_historical,0)
 h2_rsut_historical_tmn=dim_avg_n(h2_rsut_historical,0)
 h2_rsut_historical_tzmn=dim_avg_n(h2_rsut_historical_tmn,1)
 h2_rsutcs_historical_tmn=dim_avg_n(h2_rsutcs_historical,0)
@@ -577,11 +648,20 @@ h2_rlutcs_historical_tzmn=dim_avg_n(h2_rlutcs_historical_tmn,1)
 h2_rsdt_historical_tmn=dim_avg_n(h2_rsdt_historical,0)
 h2_rsdt_historical_tzmn=dim_avg_n(h2_rsdt_historical_tmn,1)
 ;
+h2_tas_historical_tgmn=wgt_areaave(h2_tas_historical_tmn,clat_am4,1.0,0)
+del_tas_hist=h2_tas_historical_tgmn-pic_tas_tgmn
+;  print("global time mean of tas of historical is: "+h2_tas_historical_tgmn)
+;  print("change of tas for selected historical period: "+del_tas_hist)
+;  print("BLUEFACE")
+;
 ;; calculate CRE: cloud radiative effect
 cre_lw_h2_historical=h2_rlut_historical_tzmn-h2_rlutcs_historical_tzmn
 cre_sw_h2_historical=h2_rsut_historical_tzmn-h2_rsutcs_historical_tzmn
 cre_net_h2_historical=cre_sw_h2_historical+cre_lw_h2_historical
+; this should be recalculated using cosine weighting....
+; cre_net_h2_historical=cre_sw_h2_historical+cre_lw_h2_historical
 ;
+
 cre_lw_h2_historical!0="lat"
 cre_lw_h2_historical&lat=h2_rsut_historical&lat
 cre_sw_h2_historical!0="lat"
@@ -602,7 +682,9 @@ filename="rlutcs_Amon_GFDL-CM4_1pctCO2_r1i1p1f1_gr1_"+warm_yrs+".nc"
 infile4=path+filename
 filename="rsdt_Amon_GFDL-CM4_1pctCO2_r1i1p1f1_gr1_"+warm_yrs+".nc"
 infile5=path+filename
-print("Years?  One of the 1pctCO2 files is: "+filename)
+filename="tas_Amon_GFDL-CM4_1pctCO2_r1i1p1f1_gr1_"+warm_yrs+".nc"
+infile6=path+filename
+  print("Years?  One of the 1pctCO2 files is: "+filename)
 ;
 ;; read data
 add_rsut_1pctCO2=addfile(infile1,"r")
@@ -615,8 +697,11 @@ add_rlutcs_1pctCO2=addfile(infile4,"r")
 abr2_rlutcs_1pctCO2=add_rlutcs_1pctCO2->rlutcs(:,:,:)
 add_rsdt_1pctCO2=addfile(infile5,"r")
 abr2_rsdt_1pctCO2=add_rsdt_1pctCO2->rsdt(:,:,:)
+add_tas_1pctCO2=addfile(infile6,"r")
+abr2_tas_1pctCO2=add_tas_1pctCO2->tas(:,:,:)
 
 ;; average data
+abr2_tas_1pctCO2_tmn=dim_avg_n(abr2_tas_1pctCO2,0)
 abr2_rsut_1pctCO2_tmn=dim_avg_n(abr2_rsut_1pctCO2,0)
 abr2_rsut_1pctCO2_tzmn=dim_avg_n(abr2_rsut_1pctCO2_tmn,1)
 abr2_rsutcs_1pctCO2_tmn=dim_avg_n(abr2_rsutcs_1pctCO2,0)
@@ -628,6 +713,9 @@ abr2_rlutcs_1pctCO2_tzmn=dim_avg_n(abr2_rlutcs_1pctCO2_tmn,1)
 abr2_rsdt_1pctCO2_tmn=dim_avg_n(abr2_rsdt_1pctCO2,0)
 abr2_rsdt_1pctCO2_tzmn=dim_avg_n(abr2_rsdt_1pctCO2_tmn,1)
 ;
+; calculate cosine weighted global mean tas
+abr2_tas_1pctCO2_tgmn=wgt_areaave(abr2_tas_1pctCO2_tmn,clat_am4,1.0,0)
+
 ;; calculate CRE: cloud radiative effect
 cre_lw_1pct=abr2_rlut_1pctCO2_tzmn-abr2_rlutcs_1pctCO2_tzmn
 cre_sw_1pct=abr2_rsut_1pctCO2_tzmn-abr2_rsutcs_1pctCO2_tzmn
@@ -653,6 +741,8 @@ filename="rlutcs_Amon_GFDL-CM4_abrupt-4xCO2_r1i1p1f1_gr1_"+warm_yrs+".nc"
 infile4=path+filename
 filename="rsdt_Amon_GFDL-CM4_abrupt-4xCO2_r1i1p1f1_gr1_"+warm_yrs+".nc"
 infile5=path+filename
+filename="tas_Amon_GFDL-CM4_abrupt-4xCO2_r1i1p1f1_gr1_"+warm_yrs+".nc"
+infile6=path+filename
 ;
 ;; read data
 add_rsut_abrupt4xCO2=addfile(infile1,"r")
@@ -665,8 +755,11 @@ add_rlutcs_abrupt4xCO2=addfile(infile4,"r")
 abr2_rlutcs_abrupt4xCO2=add_rlutcs_abrupt4xCO2->rlutcs(:,:,:)
 add_rsdt_abrupt4xCO2=addfile(infile5,"r")
 abr2_rsdt_abrupt4xCO2=add_rsdt_abrupt4xCO2->rsdt(:,:,:)
+add_tas_abrupt4xCO2=addfile(infile6,"r")
+abr2_tas_abrupt4xCO2=add_tas_abrupt4xCO2->tas(:,:,:)
 ;
 ;; average data
+abr2_tas_abrupt4xCO2_tmn=dim_avg_n(abr2_tas_abrupt4xCO2,0)
 abr2_rsut_abrupt4xCO2_tmn=dim_avg_n(abr2_rsut_abrupt4xCO2,0)
 abr2_rsut_abrupt4xCO2_tzmn=dim_avg_n(abr2_rsut_abrupt4xCO2_tmn,1)
 abr2_rsutcs_abrupt4xCO2_tmn=dim_avg_n(abr2_rsutcs_abrupt4xCO2,0)
@@ -677,6 +770,9 @@ abr2_rlutcs_abrupt4xCO2_tmn=dim_avg_n(abr2_rlutcs_abrupt4xCO2,0)
 abr2_rlutcs_abrupt4xCO2_tzmn=dim_avg_n(abr2_rlutcs_abrupt4xCO2_tmn,1)
 abr2_rsdt_abrupt4xCO2_tmn=dim_avg_n(abr2_rsdt_abrupt4xCO2,0)
 abr2_rsdt_abrupt4xCO2_tzmn=dim_avg_n(abr2_rsdt_abrupt4xCO2_tmn,1)
+
+; calculate cosine weighted global mean tas
+abr2_tas_abrupt4xCO2_tgmn=wgt_areaave(abr2_tas_abrupt4xCO2_tmn,clat_am4,1.0,0)
 ;
 ;; calculate CRE: cloud radiative effect
 cre_lw_abr2=abr2_rlut_abrupt4xCO2_tzmn-abr2_rlutcs_abrupt4xCO2_tzmn
@@ -705,6 +801,10 @@ infile4=path+filename
 filename="rsdt_Amon_GFDL-CM4_aqua-control_r1i1p1f1_gr1_198001-198912.nc"
 infile5=path+filename
 
+; get near surface air temperature...
+filename="tas_Amon_GFDL-CM4_aqua-control_r1i1p1f1_gr1_198001-198912.nc"
+infile6=path+filename
+
 ; read data
 add_rsut_aqua=addfile(infile1,"r")
 amip_rsut_aqua=add_rsut_aqua->rsut(:,:,:)
@@ -716,6 +816,8 @@ add_rlutcs_aqua=addfile(infile4,"r")
 amip_rlutcs_aqua=add_rlutcs_aqua->rlutcs(:,:,:)
 add_rsdt_aqua=addfile(infile5,"r")
 amip_rsdt_aqua=add_rsdt_aqua->rsdt(:,:,:)
+add_tas_aqua=addfile(infile6,"r")
+amip_tas_aqua=add_tas_aqua->tas(:,:,:)
 
 ; average data
 amip_rsut_aqua_tmn=dim_avg_n(amip_rsut_aqua,0)
@@ -728,6 +830,21 @@ amip_rlutcs_aqua_tmn=dim_avg_n(amip_rlutcs_aqua,0)
 amip_rlutcs_aqua_tzmn=dim_avg_n(amip_rlutcs_aqua_tmn,1)
 amip_rsdt_aqua_tmn=dim_avg_n(amip_rsdt_aqua,0)
 amip_rsdt_aqua_tzmn=dim_avg_n(amip_rsdt_aqua_tmn,1)
+; tas (check cosine weighting...)
+amip_tas_aqua_tmn=dim_avg_n(amip_tas_aqua,0)
+amip_tas_aqua_tzmn=dim_avg_n(amip_tas_aqua_tmn,1)
+
+; =0=-0=-0=-0=-0=0=-0=-0=-0=-0=-0=-0=-0-=0=
+latap      = add_tas_aqua->lat
+rad      = 4.0*atan(1.0)/180.0
+clatap     = cos(latap*rad)
+
+aqua_tas_wave=wgt_areaave(amip_tas_aqua_tmn,clatap,1.0,0)
+
+  print("=0=-0=-0=-0=-0=0=-0=-0=-0=-0=-0=-0=-0-=0=")
+  print("weighted mean of aqua control is: "+aqua_tas_wave)
+  print("=0=-0=-0=-0=-0=0=-0=-0=-0=-0=-0=-0=-0-=0=")
+; =0=-0=-0=-0=-0=0=-0=-0=-0=-0=-0=-0=-0-=0=
 
 ; calculate CRE: cloud radiative effect
 cre_lw_aqua=amip_rlut_aqua_tzmn-amip_rlutcs_aqua_tzmn
@@ -775,6 +892,10 @@ filename="rlutcs_Amon_GFDL-CM4_aqua-p4K_r1i1p1f1_gr1_198001-198912.nc"
 infile4=path+filename
 filename="rsdt_Amon_GFDL-CM4_aqua-p4K_r1i1p1f1_gr1_198001-198912.nc"
 infile5=path+filename
+; get near surface air temperature...
+filename="tas_Amon_GFDL-CM4_aqua-p4K_r1i1p1f1_gr1_198001-198912.nc"
+infile6=path+filename
+
 
 ; read data
 add_rsut_aqua_p4K=addfile(infile1,"r")
@@ -787,19 +908,47 @@ add_rlutcs_aqua_p4K=addfile(infile4,"r")
 amip_rlutcs_aqua_p4K=add_rlutcs_aqua_p4K->rlutcs(:,:,:)
 add_rsdt_aqua_p4K=addfile(infile5,"r")
 amip_rsdt_aqua_p4K=add_rsdt_aqua_p4K->rsdt(:,:,:)
+add_tas_aqua_p4K=addfile(infile6,"r")
+amip_tas_aqua_p4K=add_tas_aqua_p4K->tas(:,:,:)
 
 ;--------------------------------------------------------------------
-; average data
+; average data      e.g. amip_rsut_aqua_p4K(time|lat|lon)
+;  printVarSummary(amip_rsut_aqua_p4K)
 amip_rsut_aqua_p4K_tmn=dim_avg_n(amip_rsut_aqua_p4K,0)
+;  printVarSummary(amip_rsut_aqua_p4K_tmn)
+;   this is the point at which global mean should be taken...
 amip_rsut_aqua_p4K_tzmn=dim_avg_n(amip_rsut_aqua_p4K_tmn,1)
+;  printVarSummary(amip_rsut_aqua_p4K_tzmn)
+
 amip_rsutcs_aqua_p4K_tmn=dim_avg_n(amip_rsutcs_aqua_p4K,0)
 amip_rsutcs_aqua_p4K_tzmn=dim_avg_n(amip_rsutcs_aqua_p4K_tmn,1)
+
 amip_rlut_aqua_p4K_tmn=dim_avg_n(amip_rlut_aqua_p4K,0)
 amip_rlut_aqua_p4K_tzmn=dim_avg_n(amip_rlut_aqua_p4K_tmn,1)
+
 amip_rlutcs_aqua_p4K_tmn=dim_avg_n(amip_rlutcs_aqua_p4K,0)
 amip_rlutcs_aqua_p4K_tzmn=dim_avg_n(amip_rlutcs_aqua_p4K_tmn,1)
+
 amip_rsdt_aqua_p4K_tmn=dim_avg_n(amip_rsdt_aqua_p4K,0)
 amip_rsdt_aqua_p4K_tzmn=dim_avg_n(amip_rsdt_aqua_p4K_tmn,1)
+
+amip_tas_aqua_p4K_tmn=dim_avg_n(amip_tas_aqua_p4K,0)
+amip_tas_aqua_p4K_tzmn=dim_avg_n(amip_tas_aqua_p4K_tmn,1)
+
+
+; =0=-0=-0=-0=-0=0=-0=-0=-0=-0=-0=-0=-0-=0=
+latap      = add_tas_aqua_p4K->lat
+rad      = 4.0*atan(1.0)/180.0
+clatap     = cos(latap*rad)
+
+aqua_tas_p4K_wave=wgt_areaave(amip_tas_aqua_p4K_tmn,clatap,1.0,0)
+
+  print("=0=-0=-0=-0=-0=0=-0=-0=-0=-0=-0=-0=-0-=0=")
+  print("weighted mean of aqua p4K is: "+aqua_tas_p4K_wave)
+  print("=0=-0=-0=-0=-0=0=-0=-0=-0=-0=-0=-0=-0-=0=")
+  snake=aqua_tas_p4K_wave-aqua_tas_wave
+  print("del T for aqua +4K is: "+snake)
+; =0=-0=-0=-0=-0=0=-0=-0=-0=-0=-0=-0=-0-=0=
 
 ;--------------------------------------------------------------------
 ; calculate CRE: cloud radiative effect
@@ -809,6 +958,7 @@ cre_net_aqua_p4K=cre_sw_aqua_p4K+cre_lw_aqua_p4K
 
 cre_lw_aqua_p4K_tmn=amip_rlut_aqua_p4K_tmn-amip_rlutcs_aqua_p4K_tmn
 cre_sw_aqua_p4K_tmn=amip_rsut_aqua_p4K_tmn-amip_rsutcs_aqua_p4K_tmn
+;  printVarSummary(cre_lw_aqua_p4K_tmn)
 cre_net_aqua_p4K_tmn=cre_sw_aqua_p4K_tmn+cre_lw_aqua_p4K_tmn
 
 cre_lw_aqua_p4K!0="lat"
@@ -820,15 +970,15 @@ cre_sw_aqua_p4K&lat=amip_rsut_aqua_p4K&lat
 cre_net_aqua_p4K!0="lat"
 cre_net_aqua_p4K&lat=amip_rsut_aqua_p4K&lat
 
-cre_lw_aqua_p4K_tmn!0="lat"
-cre_lw_aqua_p4K_tmn&lat=amip_rsut_aqua&lat
-cre_lw_aqua_p4K_tmn!1="lon"
-cre_lw_aqua_p4K_tmn&lon=amip_rsut_aqua&lon
+;cre_lw_aqua_p4K_tmn!0="lat"
+;cre_lw_aqua_p4K_tmn&lat=amip_rsut_aqua&lat
+;cre_lw_aqua_p4K_tmn!1="lon"
+;cre_lw_aqua_p4K_tmn&lon=amip_rsut_aqua&lon
 
-cre_sw_aqua_p4K_tmn!0="lat"
-cre_sw_aqua_p4K_tmn&lat=amip_rsut_aqua&lat
-cre_sw_aqua_p4K_tmn!1="lon"
-cre_sw_aqua_p4K_tmn&lon=amip_rsut_aqua&lon
+;cre_sw_aqua_p4K_tmn!0="lat"
+;cre_sw_aqua_p4K_tmn&lat=amip_rsut_aqua&lat
+;cre_sw_aqua_p4K_tmn!1="lon"
+;cre_sw_aqua_p4K_tmn&lon=amip_rsut_aqua&lon
 
 cre_net_aqua_p4K_tmn!0="lat"
 cre_net_aqua_p4K_tmn&lat=amip_rsut_aqua&lat
@@ -910,20 +1060,20 @@ cre_amip_m4K_fb&lat=amip_rsut_future4K&lat
 ;-------------------------------------------------------------------------
 ; compute global mean values of data from ceres and am4
 ;-------------------------------------------------------------------------
-lat      = crs->lat
-rad      = 4.0*atan(1.0)/180.0
-clat     = cos(lat*rad)
-clat_am4 = cos(latitude*rad)
+;lat      = crs->lat
+;rad      = 4.0*atan(1.0)/180.0
+;clat     = cos(lat*rad)
+;clat_am4 = cos(latitude*rad)
 
 axis_coslat=new((/180/),float)
 
 ceres_2p8_ave=wgt_areaave(ceres_2p8_cre,clat,1.0,0)
 ceres_4p1_ave=wgt_areaave(ceres_4p1_cre,clat,1.0,0)
 
-print("mean of ceres 2p8: "+dim_avg_n(ceres_2p8_cre_ztmn,0))
-print("w mean of ceres 2p8: "+ceres_2p8_ave)
-print("mean of ceres 4p1: "+dim_avg_n(ceres_4p1_cre_ztmn,0))
-print("w mean of ceres 4p1: "+ceres_4p1_ave)
+  print("mean of ceres 2p8: "+dim_avg_n(ceres_2p8_cre_ztmn,0))
+  print("w mean of ceres 2p8: "+ceres_2p8_ave)
+  print("mean of ceres 4p1: "+dim_avg_n(ceres_4p1_cre_ztmn,0))
+  print("w mean of ceres 4p1: "+ceres_4p1_ave)
 
 ; amip p4K 
 cre_p4K=wgt_areaave(cre_net_amip_p4K_tmn,clat_am4,1.0,0)
@@ -933,25 +1083,34 @@ amip_p4K_a=(cre_p4K-cre_amip)/delT_amip_p4K
 ; amip m4K
 cre_m4K=wgt_areaave(cre_net_amip_m4K_tmn,clat_am4,1.0,0)
 amip_m4K_a=(cre_m4K-cre_amip)/delT_amip_m4K
+  ;print("dimsizes of cre_net_amip_m4K_tmn are: "+dimsizes(cre_net_amip_m4K_tmn))
+  ;print("dimsizes of cre_m4K are: "+dimsizes(cre_m4K))
+  ;print("dimsizes of amip_m4K_a are: "+dimsizes(amip_m4K_a))
+  print("delT_amip_m4K is: "+delT_amip_m4K)
 
 ; amip future4K
 cre_future4K=wgt_areaave(cre_net_amip_future4K_tmn,clat_am4,1.0,0)
 amip_future4K_a=(cre_future4K-cre_amip)/delT_amip_fut
+amip_future4K_b=(cre_net_amip_future4K_tgmn-cre_net_amip_tgmn)/delT_amip_fut
 
 ; aqua p4K 
 cre_aqua=wgt_areaave(cre_net_aqua_tmn,clat_am4,1.0,0)
 cre_aqua4K=wgt_areaave(cre_net_aqua_p4K_tmn,clat_am4,1.0,0)
 aqua_p4K_a=(cre_aqua4K-cre_aqua)/delT_aqua
 
+;  printVarSummary(cre_net_aqua_p4K_tmn)
+;  printVarSummary(cre_aqua4K)
+
   print("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
   print(" The following values indicate that the sign of the CRE and Feedbacks should be switched...")
   print(" Clouds should cool the earth overall, by roughly 20 W/m2 ")
-  print("w mean of aqua p 4K time series fb:      "+aqua_p4K_a)
+  print("w mean of CRE fb for aqua p 4K :      "+aqua_p4K_a)
   print("w mean of amip time series net:          "+cre_amip)
-  print("w mean of amip p 4K time series net:     "+cre_p4K)
-  print("w mean of amip p 4K time series fb:      "+amip_p4K_a)
-  print("w mean of amip m 4K time series fb:      "+amip_m4K_a)
-  print("w mean of amip future 4K time series fb: "+amip_future4K_a)
+  print("w mean of amip p 4K net:     "+cre_p4K)
+  print("w mean of amip p 4K fb:      "+amip_p4K_a)
+  print("w mean of amip m 4K fb:      "+amip_m4K_a)
+  print("old weighted mean of amip future 4K fb: "+amip_future4K_a)
+  print("new weighted mean of amip future 4K fb: "+amip_future4K_b)
   print("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
 
 amip_cre_fb_p4K =cre_amip_p4K_fb/delT_amip_p4K
@@ -1037,10 +1196,14 @@ end if
 end if
 if (plotbias .gt. 0) then ; plot the cre feedback
  res@tiYAxisString  = "CRE Feedback (W "+"m~S~-2~NN~K~S~-1"+"~N~"+")" 
- ;res@tiMainString = "Feedback relative to piControl"
- res@tiMainString = "SW Feedback relative to amip"
- res@trYMinF = -4 
- res@trYMaxF = 1 
+ ; below is for the coupled, warming experiments 
+ res@tiMainString = "Feedback relative to piControl"
+ res@trYMinF = -10 
+ res@trYMaxF = 5 
+ ; below is for the amip-like experiments
+ ;res@tiMainString = "SW Feedback relative to amip"
+ ;res@trYMinF = -4 
+ ;res@trYMaxF = 1 
 end if
 
  res@xyLineColors=colors(3)
@@ -1266,8 +1429,9 @@ else
   overlay(plot_alt_1,plot_alt_2)
   overlay(plot_alt_1,plot_alt_3)
   overlay(plot_alt_1,plot_alt_4)
-  overlay(plot_alt_1,plot_alt_5)
-  overlay(plot_alt_1,plot_alt_6)
+; comment these out if plotting the middle panel with only the warming experiment CRE's...
+;  overlay(plot_alt_1,plot_alt_5) ; ceres
+;  overlay(plot_alt_1,plot_alt_6) ; ceres
   plot(0)=plot_alt_1
 end if
 end if
@@ -1337,6 +1501,22 @@ if (plotbias .le. 0) then ; plot the cre feedback
 end if
 
  gsn_panel(wks,plot,(/1,1/),resP)
+
+  print("=0=-0=-0=-0=-0=0=-0=-0=-0=-0=-0=-0=-0-=0=")
+  print("global time mean of tas of PICONTROL is: "+pic_tas_tgmn)
+  print("global time mean of tas of historical is: "+h2_tas_historical_tgmn)
+  print("weighted mean of amip over particular years is: "+amip_tas_wave)
+  print("global time mean of tas of 1pctCO2 is: "+abr2_tas_1pctCO2_tgmn)
+  print("global time mean of tas of abrupt4xCO2 is: "+abr2_tas_abrupt4xCO2_tgmn)
+  print("change of tas for selected historical period: "+del_tas_hist)
+del_tas_1pct=abr2_tas_1pctCO2_tgmn-pic_tas_tgmn
+  print("change of tas for selected 1pctCO2 period: "+del_tas_1pct)
+del_tas_abrupt=abr2_tas_abrupt4xCO2_tgmn-pic_tas_tgmn
+  print("change of tas for selected abrupt4xCO2 period: "+del_tas_abrupt)
+del_tas_amip=amip_tas_wave-pic_tas_tgmn
+  print("change of tas for selected amip period: "+del_tas_amip)
+  print("BLUEFACE")
+  print("=0=-0=-0=-0=-0=0=-0=-0=-0=-0=-0=-0=-0-=0=")
 
 ;; -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 ;; compute average cre values and print to screen
