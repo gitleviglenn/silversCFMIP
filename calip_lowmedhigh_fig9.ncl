@@ -40,7 +40,7 @@ plotbias=1  ; plotbias = 0 is default and corresponds to plotting climatology
 ;
 includelegend=0  ; includelegend=1 plots legend in upper right corner of top panel
 ; 
-controlexp=0 ; 0 uses amip as control, 1 uses piControl 
+controlexp=1 ; 0 uses amip as control, 1 uses piControl 
 
   if (plotbias .gt. 0) then
     ytitle  = "Cloud Anomaly [%]"
@@ -167,6 +167,10 @@ print("infile calipso obs is: "+infile_calobs)
   filetoread_piC_m="clmcalipso_CFmon_GFDL-CM4_piControl_r1i1p1f1_gr1_025101-035012.nc"
   filetoread_piC_l="cllcalipso_CFmon_GFDL-CM4_piControl_r1i1p1f1_gr1_025101-035012.nc"
 
+;  filetoread_piC_h="clhcalipso_CFmon_GFDL-CM4_piControl_r1i1p1f1_gr1_045101-055012.nc"
+;  filetoread_piC_m="clmcalipso_CFmon_GFDL-CM4_piControl_r1i1p1f1_gr1_045101-055012.nc"
+;  filetoread_piC_l="cllcalipso_CFmon_GFDL-CM4_piControl_r1i1p1f1_gr1_045101-055012.nc"
+
 ;-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 ; define experiment paths and read data from files 
 ;-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -210,20 +214,23 @@ print("infile calipso obs is: "+infile_calobs)
 ; read data
 
 ; amip
-  endi=431
+  endi=431 ; 432 months is 36 years
 ;  starti=endi-120 ; if only plotting 10 years
   starti=0
+  ;timeper1=228; 228 months is 19 years
+  timeper1=228; 228 months is 19 years
+  starti_amip=endi-timeper1-1
 print("amip data is: "+infile_l)
   data_l = addfile(infile_l,"r")
   data_m = addfile(infile_m,"r")
   data_h = addfile(infile_h,"r")
 
-  var_l_10yr = data_l->$varname1$(starti:endi,:,:) ; low clouds from exp a
-  var_l_tmn=dim_avg_n(var_l_10yr,0) ; average over time
-  var_m_10yr = data_m->$varname2$(starti:endi,:,:) ; low clouds from exp a
-  var_m_tmn=dim_avg_n(var_m_10yr,0) ; average over time
-  var_h_10yr = data_h->$varname3$(starti:endi,:,:) ; low clouds from exp a
-  var_h_tmn=dim_avg_n(var_h_10yr,0) ; average over time
+  var_l_amip = data_l->$varname1$(starti_amip:endi,:,:) ; low clouds 
+  var_l_tmn=dim_avg_n(var_l_amip,0) ; average over time
+  var_m_amip = data_m->$varname2$(starti_amip:endi,:,:) ; mid clouds 
+  var_m_tmn=dim_avg_n(var_m_amip,0) ; average over time
+  var_h_amip = data_h->$varname3$(starti_amip:endi,:,:) ; high clouds 
+  var_h_tmn=dim_avg_n(var_h_amip,0) ; average over time
 
   var_l_ztmn=dim_avg_n(var_l_tmn,1)
   var_m_ztmn=dim_avg_n(var_m_tmn,1)
@@ -314,13 +321,14 @@ print("amip -4K data is: "+infile2_l)
 ; 120 months equal 10 years
 ; period 1 (1850-1949) has 1200 months
 ; period 2 (1950-2014) has 780 months
-  endi=779
+  endi=779 
+  start_hist=endi-timeper1-1
   ;starti=endi-120
-  var3_l_10yr = data_3_l->$varname1$(starti:endi,:,:) ; low clouds from exp a
+  var3_l_10yr = data_3_l->$varname1$(start_hist:endi,:,:) ; low clouds from exp a
   var3_l_tmn=dim_avg_n(var3_l_10yr,0) ; average over time
-  var3_m_10yr = data_3_m->$varname2$(starti:endi,:,:) ; mid clouds from exp a
+  var3_m_10yr = data_3_m->$varname2$(start_hist:endi,:,:) ; mid clouds from exp a
   var3_m_tmn=dim_avg_n(var3_m_10yr,0)
-  var3_h_10yr = data_3_h->$varname3$(starti:endi,:,:) ; high clouds from exp a
+  var3_h_10yr = data_3_h->$varname3$(start_hist:endi,:,:) ; high clouds from exp a
  ;printVarSummary(var3_h_10yr)
   var3_h_tmn=dim_avg_n(var3_h_10yr,0)
 
