@@ -33,13 +33,15 @@ path_obs="/Users/silvers/data/SatData/CERES/"
 ; everything = 0; plotbias = 0 --> Panel on left, showing the raw CRE for CERES-EBAF, coupled experiments, and amip
 ; everything = 2; plotbias = 0 --> Panel on far right showing amip type feedback experiments
 
+; as of November 2020
+; everything = 0; plotbias = 1 --> middle panel of figure 7, with CRE feedback relative to piControl
 
 everything = 0 ; switch defining which profiles are plotted
 ; 0 plots the CRE from: ceres, amip, historical, abrupt, and 1pct
 ; 1 plots the shortwave, longwave, and net CRE for amip and aqua
 ; 2 plots CRE Feedback figure showing aqua and amip-based warming experiments
 
-plotbias = 1 ; default is 0; for plotbias=1, a bias is plotted 
+plotbias = 0 ; default is 0; for plotbias=1, a bias is plotted 
 
 ; years for the abrupt and ramp warming experiments
 early="000101-010012"
@@ -136,9 +138,9 @@ clatam     = cos(latam*rad)
 
 amip_tas_wave=wgt_areaave(amip_tas_tmn,clatam,1.0,0)
 
-;  print("=0=-0=-0=-0=-0=0=-0=-0=-0=-0=-0=-0=-0-=0=")
-;  print("weighted mean of amip over particular years is: "+amip_tas_wave)
-;  print("=0=-0=-0=-0=-0=0=-0=-0=-0=-0=-0=-0=-0-=0=")
+  print("=0=-0=-0=-0=-0=0=-0=-0=-0=-0=-0=-0=-0-=0=")
+  print("weighted mean of amip over particular years is: "+amip_tas_wave)
+  print("=0=-0=-0=-0=-0=0=-0=-0=-0=-0=-0=-0=-0-=0=")
 ; =0=-0=-0=-0=-0=0=-0=-0=-0=-0=-0=-0=-0-=0=
 
 ;-------------------------------------------------------------------------
@@ -1274,7 +1276,7 @@ end if
 if (plotbias .gt. 0) then ; plot the cre feedback
  print("using a bias.  what bias? ")
  print("select bias.  ceres v2p8, ceres4p1 or piConrol ")
- cre_net_amip          =(cre_net_amip+cont_cre)/0.76
+ cre_net_amip          =(cre_net_amip+cont_cre)/0.76  ; why not normalized by 1.3K??
  cre_net_h2_historical =(cre_net_h2_historical+cont_cre)/0.8
  cre_net_abr2          =(cre_net_abr2+cont_cre)/3.99
  cre_net_1pct          =(cre_net_1pct+cont_cre)/2.0
@@ -1443,7 +1445,6 @@ end if
  lgres                      = True
  lgres@xyLabelMode            = "Custom"
  lgres@xyLineLabelFontHeightF = 0.020                ; font height
- ;lgres@lgLineColors         = (/"black","darkgoldenrod","darkolivegreen3","chocolate"/)
  lgres@lgItemType           = "Lines"
  lgres@lgLabelFontHeightF   = .07
  lgres@vpWidthF             = 0.3        ; width of legend
@@ -1451,7 +1452,6 @@ end if
  lgres@lgLineThicknessF     = lthick
  lgres@lgPerimThicknessF    = 2.0
  lgres@lgMonoDashIndex      = False 
- ;lgres@lgDashIndexes          = (/"0","0","0","0"/)
  lgres@lgPerimOn            = False
 
   resP                 = True
@@ -1480,19 +1480,14 @@ if (plotbias .le. 0) then ; plot the cre feedback
    resP@amOrthogonalPosF = -0.85     ; Move legend down more negative moves higher
    annoid = gsn_add_annotation(plot0a,legend,resP) ; add legend to plot
   else    ; plot only ceres-ebaf, amip, historical, abrupt 4xCO2, and 1% CO2 ramp
-  ; labels_b = (/"CERES-EBAF v2.8","CERES-EBAF v4.1","amip","historical","abrupt 4xCO2","1% CO2 Ramp"/)
    labels_b = (/"amip","historical","abrupt 4xCO2","1% CO2 Ramp","CERES-EBAF v2.8","CERES-EBAF v4.1"/)
-    ; colors = (/"black","darkgoldenrod","darkolivegreen3","steelblue","mediumorchid3","darkslategray4","cyan3"/) 
-   ;lgres@lgLineColors         = (/colors(0),colors(0),colors(1),colors(4),colors(5),colors(6)/)
+   ;colors = (/"black","darkgoldenrod","darkolivegreen3","steelblue","mediumorchid3","darkslategray4","cyan3"/) 
    lgres@lgLineColors         = (/colors(1),colors(4),colors(5),colors(6),colors(0),colors(0)/)
    lgres@lgDashIndexes          = (/"0","0","0","0","1","0"/)
    legend  = gsn_create_legend (wks, 6, labels_b, lgres)
-   ;resP                 = True
    resP@amJust = "BottomRight"
    resP@amParallelPosF   = -0.08    ; Move legend to right
    resP@amOrthogonalPosF = -0.05     ; Move legend down more negative moves higher
-   ;resP@amParallelPosF   = -0.12    ; Move legend to right
-   ;resP@amOrthogonalPosF = 0.45     ; Move legend down more negative moves higher
   
    annoid = gsn_add_annotation(plot_alt_1,legend,resP) ; add legend to plot
   end if 
