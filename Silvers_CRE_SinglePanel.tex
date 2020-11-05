@@ -1,0 +1,37 @@
+\documentclass[varwidth, border=10pt]{standalone}
+
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage[labelformat=parens,labelsep=quad,skip=3pt]{caption}
+\usepackage{graphicx}
+
+\begin{document}
+% for some reason, including a blank line between the subfigure blocks leads to a vertically aligned figure...
+
+\begin{figure}
+  \centering
+  %\hspace{\fill}
+  \begin{subfigure}{0.31\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{cfmipfigs/CRE_net_ceres_cfmipExps.eps}
+\end{subfigure}
+ %\hspace{\fill}
+%\vspace{2pt}
+
+ %\hspace{\fill}
+\begin{subfigure}{0.31\textwidth}
+\centering
+  \includegraphics[width=\linewidth]{cfmipfigs/CRE_feedback_fromPiControl_Norm_noCERES.eps}
+\end{subfigure}
+ %\hspace{\fill}
+%\vspace{2pt}
+
+ %\hspace{\fill}
+\begin{subfigure}{0.31\textwidth}
+\centering
+  \includegraphics[width=\linewidth]{cfmipfigs/CRE_SWonly_feedback_amip.eps}
+\end{subfigure}
+ %\hspace{\fill}
+\end{figure}
+
+\end{document}

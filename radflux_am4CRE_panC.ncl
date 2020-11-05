@@ -1,5 +1,5 @@
 ;-------------------------------------------------------------------------
-; radflux_am4CRE.ncl 
+; radflux_am4CRE_panC.ncl 
 ;-------------------------------------------------------------------------
 ;
 ; compute CRE as a function of latitude for particular CFMIP experiments
@@ -315,52 +315,6 @@ cre_net_pic_tmn!1="lon"
 cre_net_pic_tmn&lon=pic_rsut&lon
 
 ;-------------------------------------------------------------------------
-;---------------------------------------------------------------------
-; ceres data read below
-;---------------------------------------------------------------------
-;  crs = addfile(infile_obs,"r")
-varname1="toa_cre_sw_mon"
-varname2="toa_cre_lw_mon"
-varname3="toa_cre_net_mon"
-ceres_swcre = crs->$varname1$(:,:,:)
-ceres_lwcre = crs->$varname2$(:,:,:)
-ceres_netcre = crs->$varname3$(:,:,:)
-
-print("dims before averaging "+dimsizes(ceres_swcre))
-ceres_swcre_tmn  =dim_avg_n(ceres_swcre,0)
-ceres_lwcre_tmn  =dim_avg_n(ceres_lwcre,0)
-ceres_netcre_tmn =dim_avg_n(ceres_netcre,0)
-print("dims after averaging "+dimsizes(ceres_swcre_tmn))
-
-;
-  crs_4p1 = addfile(infile_obs_4p1,"r")
-varname1="toa_sw_all_mon"
-varname2="toa_sw_clr_t_mon"; what is the difference between the clr_t and clr_c vars?
-;varname2="toa_sw_clr_c_mon"; what is the difference between the clr_t and clr_c vars?
-varname3="toa_lw_all_mon"
-varname4="toa_lw_clr_t_mon"
-;varname4="toa_lw_clr_c_mon"
-ceres_sw_all = crs_4p1->$varname1$(:,:,:)
-ceres_sw_clr = crs_4p1->$varname2$(:,:,:)
-ceres_lw_all = crs_4p1->$varname3$(:,:,:)
-ceres_lw_clr = crs_4p1->$varname4$(:,:,:)
-
-ceres_lw_cre=-ceres_lw_all+ceres_lw_clr
-ceres_lw_cre_tmn=dim_avg_n(ceres_lw_cre,0)
-ceres_sw_cre=-ceres_sw_all+ceres_sw_clr
-ceres_sw_cre_tmn=dim_avg_n(ceres_sw_cre,0)
-
-ceres_2p8_cre=ceres_netcre_tmn
-;ceres_2p8_cre=ceres_lwcre_tmn+ceres_swcre_tmn
-ceres_4p1_cre=ceres_lw_cre_tmn+ceres_sw_cre_tmn
-
-; ceres data is at a higher resolution (180x360 than) so we need to interpolate 
-; CERES to the AM4 grid if we want to plot global maps
-
-ceres_2p8_cre_ztmn=dim_avg_n(ceres_2p8_cre,1)
-ceres_4p1_cre_ztmn=dim_avg_n(ceres_4p1_cre,1)
-
-;-------------------------------------------------------------------------
 ; for amip m4K
 ;-------------------------------------------------------------------------
 filename="rsut_Amon_GFDL-CM4_amip-m4K_r1i1p1f1_gr1_197901-201412.nc"
@@ -608,195 +562,7 @@ cre_net_amip_future4K_tmn!0="lat"
 cre_net_amip_future4K_tmn&lat=amip_rsut_future4K&lat
 cre_net_amip_future4K_tmn!1="lon"
 cre_net_amip_future4K_tmn&lon=amip_rsut_future4K&lon
-;
-;-------------------------------------------------------------------------
-;;-------------------------------------------------------------------------
-; for historical
-;-------------------------------------------------------------------------
-filename="rsut_Amon_GFDL-CM4_historical_r1i1p1f1_gr1_"+hist_yrs+".nc"
-infile1=path+filename
-filename="rsutcs_Amon_GFDL-CM4_historical_r1i1p1f1_gr1_"+hist_yrs+".nc"
-infile2=path+filename
-filename="rlut_Amon_GFDL-CM4_historical_r1i1p1f1_gr1_"+hist_yrs+".nc"
-infile3=path+filename
-filename="rlutcs_Amon_GFDL-CM4_historical_r1i1p1f1_gr1_"+hist_yrs+".nc"
-infile4=path+filename
-filename="rsdt_Amon_GFDL-CM4_historical_r1i1p1f1_gr1_"+hist_yrs+".nc"
-infile5=path+filename
-filename="tas_Amon_GFDL-CM4_historical_r1i1p1f1_gr1_"+hist_yrs+".nc"
-infile6=path+filename
-;
-;; read data
-add_rsut_historical=addfile(infile1,"r")
-h2_rsut_historical=add_rsut_historical->rsut(firstmonth:lastmonth,:,:)
-add_rsutcs_historical=addfile(infile2,"r")
-h2_rsutcs_historical=add_rsutcs_historical->rsutcs(firstmonth:lastmonth,:,:)
-add_rlut_historical=addfile(infile3,"r")
-h2_rlut_historical=add_rlut_historical->rlut(firstmonth:lastmonth,:,:)
-add_rlutcs_historical=addfile(infile4,"r")
-h2_rlutcs_historical=add_rlutcs_historical->rlutcs(firstmonth:lastmonth,:,:)
-add_rsdt_historical=addfile(infile5,"r")
-h2_rsdt_historical=add_rsdt_historical->rsdt(firstmonth:lastmonth,:,:)
-add_tas_historical=addfile(infile6,"r")
-h2_tas_historical=add_tas_historical->tas(firstmonth:lastmonth,:,:)
-;
-print("!@#$Q$#^#$^%&$^*")
-print("Years? one of the historical files is: "+infile2)
-print("!@#$Q$#^#$^%&$^*")
-;
-;; average data
-h2_tas_historical_tmn=dim_avg_n(h2_tas_historical,0)
-h2_rsut_historical_tmn=dim_avg_n(h2_rsut_historical,0)
-h2_rsut_historical_tzmn=dim_avg_n(h2_rsut_historical_tmn,1)
-h2_rsutcs_historical_tmn=dim_avg_n(h2_rsutcs_historical,0)
-h2_rsutcs_historical_tzmn=dim_avg_n(h2_rsutcs_historical_tmn,1)
-h2_rlut_historical_tmn=dim_avg_n(h2_rlut_historical,0)
-h2_rlut_historical_tzmn=dim_avg_n(h2_rlut_historical_tmn,1)
-h2_rlutcs_historical_tmn=dim_avg_n(h2_rlutcs_historical,0)
-h2_rlutcs_historical_tzmn=dim_avg_n(h2_rlutcs_historical_tmn,1)
-h2_rsdt_historical_tmn=dim_avg_n(h2_rsdt_historical,0)
-h2_rsdt_historical_tzmn=dim_avg_n(h2_rsdt_historical_tmn,1)
-;
-h2_tas_historical_tgmn=wgt_areaave(h2_tas_historical_tmn,clat_am4,1.0,0)
-del_tas_hist=h2_tas_historical_tgmn-pic_tas_tgmn
-;  print("global time mean of tas of historical is: "+h2_tas_historical_tgmn)
-;  print("change of tas for selected historical period: "+del_tas_hist)
-;  print("BLUEFACE")
-;
-;; calculate CRE: cloud radiative effect
-cre_lw_h2_historical=h2_rlut_historical_tzmn-h2_rlutcs_historical_tzmn
-cre_sw_h2_historical=h2_rsut_historical_tzmn-h2_rsutcs_historical_tzmn
-cre_net_h2_historical=cre_sw_h2_historical+cre_lw_h2_historical
-; this should be recalculated using cosine weighting....
-; cre_net_h2_historical=cre_sw_h2_historical+cre_lw_h2_historical
-;
-
-cre_lw_h2_historical!0="lat"
-cre_lw_h2_historical&lat=h2_rsut_historical&lat
-cre_sw_h2_historical!0="lat"
-cre_sw_h2_historical&lat=h2_rsut_historical&lat
-cre_net_h2_historical!0="lat"
-cre_net_h2_historical&lat=h2_rsut_historical&lat
-;
-;;-------------------------------------------------------------------------
-; for 1pctCO2 
-;-------------------------------------------------------------------------
-filename="rsut_Amon_GFDL-CM4_1pctCO2_r1i1p1f1_gr1_"+warm_yrs+".nc"
-infile1=path+filename
-filename="rsutcs_Amon_GFDL-CM4_1pctCO2_r1i1p1f1_gr1_"+warm_yrs+".nc"
-infile2=path+filename
-filename="rlut_Amon_GFDL-CM4_1pctCO2_r1i1p1f1_gr1_"+warm_yrs+".nc"
-infile3=path+filename
-filename="rlutcs_Amon_GFDL-CM4_1pctCO2_r1i1p1f1_gr1_"+warm_yrs+".nc"
-infile4=path+filename
-filename="rsdt_Amon_GFDL-CM4_1pctCO2_r1i1p1f1_gr1_"+warm_yrs+".nc"
-infile5=path+filename
-filename="tas_Amon_GFDL-CM4_1pctCO2_r1i1p1f1_gr1_"+warm_yrs+".nc"
-infile6=path+filename
-  print("Years?  One of the 1pctCO2 files is: "+filename)
-;
-;; read data
-add_rsut_1pctCO2=addfile(infile1,"r")
-abr2_rsut_1pctCO2=add_rsut_1pctCO2->rsut(:,:,:)
-add_rsutcs_1pctCO2=addfile(infile2,"r")
-abr2_rsutcs_1pctCO2=add_rsutcs_1pctCO2->rsutcs(:,:,:)
-add_rlut_1pctCO2=addfile(infile3,"r")
-abr2_rlut_1pctCO2=add_rlut_1pctCO2->rlut(:,:,:)
-add_rlutcs_1pctCO2=addfile(infile4,"r")
-abr2_rlutcs_1pctCO2=add_rlutcs_1pctCO2->rlutcs(:,:,:)
-add_rsdt_1pctCO2=addfile(infile5,"r")
-abr2_rsdt_1pctCO2=add_rsdt_1pctCO2->rsdt(:,:,:)
-add_tas_1pctCO2=addfile(infile6,"r")
-abr2_tas_1pctCO2=add_tas_1pctCO2->tas(:,:,:)
-
-;; average data
-abr2_tas_1pctCO2_tmn=dim_avg_n(abr2_tas_1pctCO2,0)
-abr2_rsut_1pctCO2_tmn=dim_avg_n(abr2_rsut_1pctCO2,0)
-abr2_rsut_1pctCO2_tzmn=dim_avg_n(abr2_rsut_1pctCO2_tmn,1)
-abr2_rsutcs_1pctCO2_tmn=dim_avg_n(abr2_rsutcs_1pctCO2,0)
-abr2_rsutcs_1pctCO2_tzmn=dim_avg_n(abr2_rsutcs_1pctCO2_tmn,1)
-abr2_rlut_1pctCO2_tmn=dim_avg_n(abr2_rlut_1pctCO2,0)
-abr2_rlut_1pctCO2_tzmn=dim_avg_n(abr2_rlut_1pctCO2_tmn,1)
-abr2_rlutcs_1pctCO2_tmn=dim_avg_n(abr2_rlutcs_1pctCO2,0)
-abr2_rlutcs_1pctCO2_tzmn=dim_avg_n(abr2_rlutcs_1pctCO2_tmn,1)
-abr2_rsdt_1pctCO2_tmn=dim_avg_n(abr2_rsdt_1pctCO2,0)
-abr2_rsdt_1pctCO2_tzmn=dim_avg_n(abr2_rsdt_1pctCO2_tmn,1)
-;
-; calculate cosine weighted global mean tas
-abr2_tas_1pctCO2_tgmn=wgt_areaave(abr2_tas_1pctCO2_tmn,clat_am4,1.0,0)
-
-;; calculate CRE: cloud radiative effect
-cre_lw_1pct=abr2_rlut_1pctCO2_tzmn-abr2_rlutcs_1pctCO2_tzmn
-cre_sw_1pct=abr2_rsut_1pctCO2_tzmn-abr2_rsutcs_1pctCO2_tzmn
-cre_net_1pct=cre_sw_1pct+cre_lw_1pct
-;
-cre_lw_1pct!0="lat"
-cre_lw_1pct&lat=abr2_rsut_1pctCO2&lat
-cre_sw_1pct!0="lat"
-cre_sw_1pct&lat=abr2_rsut_1pctCO2&lat
-cre_net_1pct!0="lat"
-cre_net_1pct&lat=abr2_rsut_1pctCO2&lat
-;
-;;-------------------------------------------------------------------------
-; for abrupt 4xCO2 
-;-------------------------------------------------------------------------
-filename="rsut_Amon_GFDL-CM4_abrupt-4xCO2_r1i1p1f1_gr1_"+warm_yrs+".nc"
-infile1=path+filename
-filename="rsutcs_Amon_GFDL-CM4_abrupt-4xCO2_r1i1p1f1_gr1_"+warm_yrs+".nc"
-infile2=path+filename
-filename="rlut_Amon_GFDL-CM4_abrupt-4xCO2_r1i1p1f1_gr1_"+warm_yrs+".nc"
-infile3=path+filename
-filename="rlutcs_Amon_GFDL-CM4_abrupt-4xCO2_r1i1p1f1_gr1_"+warm_yrs+".nc"
-infile4=path+filename
-filename="rsdt_Amon_GFDL-CM4_abrupt-4xCO2_r1i1p1f1_gr1_"+warm_yrs+".nc"
-infile5=path+filename
-filename="tas_Amon_GFDL-CM4_abrupt-4xCO2_r1i1p1f1_gr1_"+warm_yrs+".nc"
-infile6=path+filename
-;
-;; read data
-add_rsut_abrupt4xCO2=addfile(infile1,"r")
-abr2_rsut_abrupt4xCO2=add_rsut_abrupt4xCO2->rsut(:,:,:)
-add_rsutcs_abrupt4xCO2=addfile(infile2,"r")
-abr2_rsutcs_abrupt4xCO2=add_rsutcs_abrupt4xCO2->rsutcs(:,:,:)
-add_rlut_abrupt4xCO2=addfile(infile3,"r")
-abr2_rlut_abrupt4xCO2=add_rlut_abrupt4xCO2->rlut(:,:,:)
-add_rlutcs_abrupt4xCO2=addfile(infile4,"r")
-abr2_rlutcs_abrupt4xCO2=add_rlutcs_abrupt4xCO2->rlutcs(:,:,:)
-add_rsdt_abrupt4xCO2=addfile(infile5,"r")
-abr2_rsdt_abrupt4xCO2=add_rsdt_abrupt4xCO2->rsdt(:,:,:)
-add_tas_abrupt4xCO2=addfile(infile6,"r")
-abr2_tas_abrupt4xCO2=add_tas_abrupt4xCO2->tas(:,:,:)
-;
-;; average data
-abr2_tas_abrupt4xCO2_tmn=dim_avg_n(abr2_tas_abrupt4xCO2,0)
-abr2_rsut_abrupt4xCO2_tmn=dim_avg_n(abr2_rsut_abrupt4xCO2,0)
-abr2_rsut_abrupt4xCO2_tzmn=dim_avg_n(abr2_rsut_abrupt4xCO2_tmn,1)
-abr2_rsutcs_abrupt4xCO2_tmn=dim_avg_n(abr2_rsutcs_abrupt4xCO2,0)
-abr2_rsutcs_abrupt4xCO2_tzmn=dim_avg_n(abr2_rsutcs_abrupt4xCO2_tmn,1)
-abr2_rlut_abrupt4xCO2_tmn=dim_avg_n(abr2_rlut_abrupt4xCO2,0)
-abr2_rlut_abrupt4xCO2_tzmn=dim_avg_n(abr2_rlut_abrupt4xCO2_tmn,1)
-abr2_rlutcs_abrupt4xCO2_tmn=dim_avg_n(abr2_rlutcs_abrupt4xCO2,0)
-abr2_rlutcs_abrupt4xCO2_tzmn=dim_avg_n(abr2_rlutcs_abrupt4xCO2_tmn,1)
-abr2_rsdt_abrupt4xCO2_tmn=dim_avg_n(abr2_rsdt_abrupt4xCO2,0)
-abr2_rsdt_abrupt4xCO2_tzmn=dim_avg_n(abr2_rsdt_abrupt4xCO2_tmn,1)
-
-; calculate cosine weighted global mean tas
-abr2_tas_abrupt4xCO2_tgmn=wgt_areaave(abr2_tas_abrupt4xCO2_tmn,clat_am4,1.0,0)
-;
-;; calculate CRE: cloud radiative effect
-cre_lw_abr2=abr2_rlut_abrupt4xCO2_tzmn-abr2_rlutcs_abrupt4xCO2_tzmn
-cre_sw_abr2=abr2_rsut_abrupt4xCO2_tzmn-abr2_rsutcs_abrupt4xCO2_tzmn
-cre_net_abr2=cre_sw_abr2+cre_lw_abr2
-;
-cre_lw_abr2!0="lat"
-cre_lw_abr2&lat=abr2_rsut_abrupt4xCO2&lat
-cre_sw_abr2!0="lat"
-cre_sw_abr2&lat=abr2_rsut_abrupt4xCO2&lat
-cre_net_abr2!0="lat"
-cre_net_abr2&lat=abr2_rsut_abrupt4xCO2&lat
-;
-;--------------------------------------------------------------------------
-;--------------------------------------------------------------------------
+;;;-------------------------------------------------------------------------
 ; for aqua control 
 ;-------------------------------------------------------------------------
 filename="rsut_Amon_GFDL-CM4_aqua-control_r1i1p1f1_gr1_198001-198912.nc"
@@ -979,16 +745,6 @@ cre_sw_aqua_p4K&lat=amip_rsut_aqua_p4K&lat
 cre_net_aqua_p4K!0="lat"
 cre_net_aqua_p4K&lat=amip_rsut_aqua_p4K&lat
 
-;cre_lw_aqua_p4K_tmn!0="lat"
-;cre_lw_aqua_p4K_tmn&lat=amip_rsut_aqua&lat
-;cre_lw_aqua_p4K_tmn!1="lon"
-;cre_lw_aqua_p4K_tmn&lon=amip_rsut_aqua&lon
-
-;cre_sw_aqua_p4K_tmn!0="lat"
-;cre_sw_aqua_p4K_tmn&lat=amip_rsut_aqua&lat
-;cre_sw_aqua_p4K_tmn!1="lon"
-;cre_sw_aqua_p4K_tmn&lon=amip_rsut_aqua&lon
-
 cre_net_aqua_p4K_tmn!0="lat"
 cre_net_aqua_p4K_tmn&lat=amip_rsut_aqua&lat
 cre_net_aqua_p4K_tmn!1="lon"
@@ -1003,6 +759,7 @@ cre_net_aqua_p4K_tmn&lon=amip_rsut_aqua&lon
 ;cont_cre=ceres_2p8_cre_ztmn
 ;cont_cre=ceres_4p1_cre_ztmn
 cont_cre=-cre_net_pic 
+
 ;-------------------------------------------------------------------------
 ; compute CRE feedbacks....
 ;-------------------------------------------------------------------------
@@ -1069,20 +826,8 @@ cre_amip_m4K_fb&lat=amip_rsut_future4K&lat
 ;-------------------------------------------------------------------------
 ; compute global mean values of data from ceres and am4
 ;-------------------------------------------------------------------------
-;lat      = crs->lat
-;rad      = 4.0*atan(1.0)/180.0
-;clat     = cos(lat*rad)
-;clat_am4 = cos(latitude*rad)
 
 axis_coslat=new((/180/),float)
-
-ceres_2p8_ave=wgt_areaave(ceres_2p8_cre,clat,1.0,0)
-ceres_4p1_ave=wgt_areaave(ceres_4p1_cre,clat,1.0,0)
-
-  print("mean of ceres 2p8: "+dim_avg_n(ceres_2p8_cre_ztmn,0))
-  print("w mean of ceres 2p8: "+ceres_2p8_ave)
-  print("mean of ceres 4p1: "+dim_avg_n(ceres_4p1_cre_ztmn,0))
-  print("w mean of ceres 4p1: "+ceres_4p1_ave)
 
 ; amip p4K 
 cre_p4K=wgt_areaave(cre_net_amip_p4K_tmn,clat_am4,1.0,0)
@@ -1107,9 +852,6 @@ cre_aqua=wgt_areaave(cre_net_aqua_tmn,clat_am4,1.0,0)
 cre_aqua4K=wgt_areaave(cre_net_aqua_p4K_tmn,clat_am4,1.0,0)
 aqua_p4K_a=(cre_aqua4K-cre_aqua)/delT_aqua
 
-;  printVarSummary(cre_net_aqua_p4K_tmn)
-;  printVarSummary(cre_aqua4K)
-
   print("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
   print(" The following values indicate that the sign of the CRE and Feedbacks should be switched...")
   print(" Clouds should cool the earth overall, by roughly 20 W/m2 ")
@@ -1125,14 +867,8 @@ aqua_p4K_a=(cre_aqua4K-cre_aqua)/delT_aqua
 amip_cre_fb_p4K =cre_amip_p4K_fb/delT_amip_p4K
 amip_b=amip_cre_fb_p4K*clat_am4/180
 
-;  print("dimsizes of amip_cre_fb_p4K: "+dimsizes(amip_cre_fb_p4K))
-;  print("amip_cre_fb_p4K (0): "+amip_cre_fb_p4K(0)+" :"+cos(latitude(0)*rad)+"; amip_cre_fb_p4K (90): "+amip_cre_fb_p4K(90)+" :"+cos(latitude(90)*rad))
-
-;amip_cre_fb_p4K_gave=wgt_areaave(amip_cre_fb_p4K,clat_am4,1.0,0)
-;  print("w mean of amip p4K fb: "+amip_cre_fb_p4K_gave)
   print("w jerry-rigged mean of amip p4K fb: "+sum(amip_b))
 
-;printVarSummary(var_to_interpolate)
 ;-------------------------------------------------------------------------
 ; make plot
   ;wks   = gsn_open_wks ("newPDF","testplot")
@@ -1151,8 +887,6 @@ amip_b=amip_cre_fb_p4K*clat_am4/180
  
   res@tiMainFont = 21
   res@tiMainFontHeightF = fontsize
-  ;res@tiYAxisString  = "[W/m2K]" 
-  ;res@tiYAxisString  = "[W/m2]" 
   res@tiYAxisFont    = 21
   res@tiYAxisFontHeightF = fontsize 
   res@tiXAxisString  = "Latitude"
@@ -1174,8 +908,7 @@ amip_b=amip_cre_fb_p4K*clat_am4/180
   res@tmXBMinorValues =(/-80.,-70.,-50.,-40.,-20.,-10.,10.,20.,40.,50.,70.,80./)
 
 ; here is where the colors, line styles, and string names are defined 
- ; colors = (/"black","darkgoldenrod","darkolivegreen3","steelblue","mediumorchid4","darkslategray4","gold"/) 
-    colors = (/"black","darkgoldenrod","darkolivegreen3","steelblue","mediumorchid3","darkslategray4","cyan3","red"/) 
+  colors = (/"black","darkgoldenrod","darkolivegreen3","steelblue","mediumorchid3","darkslategray4","cyan3","red"/) 
   title_1="net CRE"
   title_2="sw CRE"
   title_3="lw CRE"
@@ -1205,14 +938,9 @@ end if
 end if
 if (plotbias .gt. 0) then ; plot the cre feedback
  res@tiYAxisString  = "CRE Feedback (W "+"m~S~-2~NN~K~S~-1"+"~N~"+")" 
- ; below is for the coupled, warming experiments 
- res@tiMainString = "Feedback relative to piControl"
- res@trYMinF = -10 
- res@trYMaxF = 5 
- ; below is for the amip-like experiments
- ;res@tiMainString = "SW Feedback relative to amip"
- ;res@trYMinF = -4 
- ;res@trYMaxF = 1 
+ res@tiMainString = "SW Feedback relative to amip"
+ res@trYMinF = -4 
+ res@trYMaxF = 1 
 end if
 
  res@xyLineColors=colors(3)
@@ -1258,71 +986,18 @@ end if
  res@xyLineColors=colors(0)
  plot4c=gsn_csm_xy(wks,latitude(:),cre_lw_aqua_p4K(:),res)
 
- res@xyDashPattern="0"
- res@xyLineColors=colors(4)
- plot5a=gsn_csm_xy(wks,latitude(:),cre_net_h2_historical(:),res)
- res@xyDashPattern="16"
- res@xyLineColors=colors(4)
- plot5b=gsn_csm_xy(wks,latitude(:),cre_sw_h2_historical(:),res)
- res@xyLineColors=colors(4)
- plot5c=gsn_csm_xy(wks,latitude(:),cre_lw_h2_historical(:),res)
-
- res@xyDashPattern="0"
- res@xyLineColors=colors(5)
- plot6a=gsn_csm_xy(wks,latitude(:),cre_net_abr2(:),res)
- res@xyDashPattern="16"
- res@xyLineColors=colors(5)
- plot6b=gsn_csm_xy(wks,latitude(:),cre_sw_abr2(:),res)
- res@xyLineColors=colors(5)
- plot6c=gsn_csm_xy(wks,latitude(:),cre_lw_abr2(:),res)
 
 ;;; compute bias
-; I am still working out the normalizations for these profiles...
-; 
 if (plotbias .gt. 0) then ; plot the cre feedback
  print("using a bias.  what bias? ")
- print("select bias.  ceres v2p8, ceres4p1 or piConrol ")
  cre_net_amip          =(cre_net_amip+cont_cre)/0.76  ; why not normalized by 1.3K??
- cre_net_h2_historical =(cre_net_h2_historical+cont_cre)/0.8
- cre_net_abr2          =(cre_net_abr2+cont_cre)/3.99
- cre_net_1pct          =(cre_net_1pct+cont_cre)/2.0
- ceres_2p8_cre_ztmn    =(ceres_2p8_cre_ztmn-cont_cre)/0.8
- ceres_4p1_cre_ztmn    =(ceres_4p1_cre_ztmn-cont_cre)/0.8
 end if
-;
- res@xyLineColors=colors(1)
- res@xyDashPattern="0"
- plot_alt_1=gsn_csm_xy(wks,latitude(:),-cre_net_amip(:),res)
- res@xyDashPattern="0"
- res@xyLineColors=colors(4)
- plot_alt_2=gsn_csm_xy(wks,latitude(:),-cre_net_h2_historical(:),res)
- res@xyDashPattern="0"
- res@xyLineColors=colors(5)
- plot_alt_3=gsn_csm_xy(wks,latitude(:),-cre_net_abr2(:),res)
- res@xyLineColors=colors(6)
- plot_alt_4=gsn_csm_xy(wks,latitude(:),-cre_net_1pct(:),res)
- res@xyDashPattern="1"
- res@xyLineColors=colors(0)
- plot_alt_5=gsn_csm_xy(wks,latitude(:),ceres_2p8_cre_ztmn(:),res)
- res@xyDashPattern="0"
- res@xyLineColors=colors(0)
- plot_alt_6=gsn_csm_xy(wks,latitude(:),ceres_4p1_cre_ztmn(:),res)
 
-print("plotted ceres 2p8 mean is: "+dim_avg_n(ceres_2p8_cre_ztmn,0))
-print("plotted ceres 4p1 mean is: "+dim_avg_n(ceres_4p1_cre_ztmn,0))
-print("plotted cre net amip mean is: "+dim_avg_n(cre_net_amip,0))
-print("plotted cre net h2 historical mean is: "+dim_avg_n(cre_net_h2_historical,0))
-print("plotted cre net abr2 mean is: "+dim_avg_n(cre_net_abr2,0))
-print("plotted cre net 1pct mean is: "+dim_avg_n(cre_net_1pct,0))
-
-if (everything .ge. 2) then ; plot the cre feedback
   colors_cre = (/"black","darkgoldenrod","darkolivegreen3","steelblue","mediumorchid3","darkslategray4","cyan3","red","steelblue1"/) 
   labels_cre = (/"amip +future4K","amip +4K","amip -4K","aqua +4K"/) ; bottom to top
 
 testaxis=cos(latitude*rad)
 testaxis=where(latitude.lt.0,-testaxis,testaxis)
-;print("creeps: "+testaxis)
-;printVarSummary(latitude)
 
   res@xyLineColors=colors_cre(0)
   res@xyLineThicknessF  = lthin
@@ -1375,75 +1050,16 @@ testaxis=where(latitude.lt.0,-testaxis,testaxis)
   plot0eb=gsn_csm_xy(wks,latitude(:),-cresw_aqua_p4K_fb(:)/delT_aqua,res)
 
 ; plot sw cre
-  overlay(plot0a,plot0bb)
-  overlay(plot0a,plot0cb)
-  overlay(plot0a,plot0db)
-  overlay(plot0a,plot0eb)
+;  overlay(plot0a,plot0bb) ; amip p4k
+;  overlay(plot0bb,plot0b) ; amip p4k total
+  overlay(plot0bb,plot0cb) ; amip m4k
+;  overlay(plot0bb,plot0c) ; amip m4k
+  overlay(plot0bb,plot0db) ; amip fut
+;  overlay(plot0bb,plot0d) ; amip fut
+  overlay(plot0bb,plot0eb) ; aqua p4k
+;  overlay(plot0bb,plot0e) ; aqua p4k
 
-;; pretty much everything...
-;  overlay(plot0a,plot0e)
-;  overlay(plot0a,plot0eb)
-;  overlay(plot0a,plot0ec)
-;  overlay(plot0a,plot0b)
-;  overlay(plot0a,plot0bb)
-;  overlay(plot0a,plot0bc)
-;  overlay(plot0a,plot0c)
-;  overlay(plot0a,plot0cb)
-;  overlay(plot0a,plot0cc)
-;  overlay(plot0a,plot0d)
-;  overlay(plot0a,plot0db)
-;  overlay(plot0a,plot0dc)
-
-  plot(0)=plot0a
-
-else if (everything .ge. 1) then ; plot the whole shebang
- ; overlay the profiles to plot
- ; amip -4K
-  overlay(plot0a,plot0b)
-  overlay(plot0a,plot0c)
- 
- ; amip
-  overlay(plot0a,plot1a)
-  overlay(plot0a,plot1b)
-  overlay(plot0a,plot1c)
- 
- ; amip +4K
-  overlay(plot0a,plot2a)
-  overlay(plot0a,plot2b)
-  overlay(plot0a,plot2c)
- 
- ; aqua 
-  overlay(plot0a,plot3a)
-  overlay(plot0a,plot3b)
-  overlay(plot0a,plot3c)
- 
- ; aqua +4K
-  overlay(plot0a,plot4a)
-  overlay(plot0a,plot4b)
-  overlay(plot0a,plot4c)
- 
- ; historical 2
-  overlay(plot0a,plot5a)
-  overlay(plot0a,plot5b)
-  overlay(plot0a,plot5c)
- 
- ; abrupt 4xCO2 2
-  overlay(plot0a,plot6a)
-  overlay(plot0a,plot6b)
-  overlay(plot0a,plot6c)
- 
-  plot(0)=plot0a
- 
-else
-  overlay(plot_alt_1,plot_alt_2)
-  overlay(plot_alt_1,plot_alt_3)
-  overlay(plot_alt_1,plot_alt_4)
-; comment these out if plotting the middle panel with only the warming experiment CRE's...
-;  overlay(plot_alt_1,plot_alt_5) ; ceres
-;  overlay(plot_alt_1,plot_alt_6) ; ceres
-  plot(0)=plot_alt_1
-end if
-end if
+  plot(0)=plot0bb
 
 ;-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--=--=-=-=-=-=-=-=-=-=-=-=-=-
 ;       add a legend
@@ -1462,101 +1078,32 @@ end if
 
   resP                 = True
 ; draw panel with white space added
-if (plotbias .le. 0) then ; plot the cre feedback
-  if (everything .ge. 2) then
-   print("everything is greather than 2")
-   legend  = gsn_create_legend (wks, 4, labels_cre, lgres)
-   lgres@lgLineColors         = (/colors_cre(7),colors_cre(2),colors_cre(3),colors_cre(8)/)
-   lgres@lgDashIndexes = (/"0","0","0","0"/)
-   legend  = gsn_create_legend (wks, 4, labels_cre, lgres)
-   ;resP                 = True
-   resP@amJust = "BottomRight"
-   ;resP@amParallelPosF   = 0.42    ; Move legend to right
-   ;resP@amOrthogonalPosF = -0.1     ; Move legend down more negative moves higher
-   resP@amParallelPosF   = 0.32    ; Move legend to right
-   resP@amOrthogonalPosF = 0.35     ; Move legend down more negative moves higher
-   annoid = gsn_add_annotation(plot0a,legend,resP) ; add legend to plot
-  else if(everything .ge. 1) then ; plot the whole shebang
-   legend  = gsn_create_legend (wks, 3, labels, lgres)
-   lgres@lgDashIndexes = (/"0","0","0","0"/)
-   ;resP                 = True
-   resP@amJust = "BottomRight"
-   ;resP@amParallelPosF   = 0.42    ; Move legend to right
-   resP@amParallelPosF   = -0.12    ; Move legend to right
-   resP@amOrthogonalPosF = -0.85     ; Move legend down more negative moves higher
-   annoid = gsn_add_annotation(plot0a,legend,resP) ; add legend to plot
-  ;else    ; plot only ceres-ebaf, amip, historical, abrupt 4xCO2, and 1% CO2 ramp
-  ; labels_b = (/"amip","historical","abrupt 4xCO2","1% CO2 Ramp","CERES-EBAF v2.8","CERES-EBAF v4.1"/)
-  ; ;colors = (/"black","darkgoldenrod","darkolivegreen3","steelblue","mediumorchid3","darkslategray4","cyan3"/) 
-  ; lgres@lgLineColors         = (/colors(1),colors(4),colors(5),colors(6),colors(0),colors(0)/)
-  ; lgres@lgDashIndexes          = (/"0","0","0","0","1","0"/)
-  ; legend  = gsn_create_legend (wks, 6, labels_b, lgres)
-  ; resP@amJust = "BottomRight"
-  ; ;resP@amParallelPosF   = -0.08    ; Move legend to right
-  ; ;resP@amOrthogonalPosF = -0.05     ; Move legend down more negative moves higher
-  ; resP@amParallelPosF   = 0.0    ; Move legend to right
-  ; resP@amOrthogonalPosF = 0.05     ; Move legend down more negative moves higher
-  ;
-  ; annoid = gsn_add_annotation(plot_alt_1,legend,resP) ; add legend to plot
-  else
-    gsres               = True
-    txres               = True
-    gsres@gsMarkerIndex = 16
-    txres@txFontHeightF = 0.015
-    colors_leg = (/"darkgoldenrod","mediumorchid3","darkolivegreen3","darkslategray4","grey49","black"/) 
-    labels_b = (/"amip","historical","abrupt 4xCO2","1% CO2 Ramp","CERES-EBAF v2.8","CERES-EBAF v4.1"/)
-    yb=0.37
-    yt=0.41
-    xleg = (/0.40,0.40,0.54,0.54,0.74,0.74/)   ; Location of
-    xtxt = (/0.46,0.48,0.65,0.65,0.87,0.87/)   ; legend markers
-    yleg = (/yt,yb,yt,yb,yt,yb/)   ; and text
-    ytxt = (/yt,yb,yt,yb,yt,yb/)   ; strings.
-    do i = 0,5
-      gsres@gsLineColor              = colors_leg(i)
-      gsres@gsLineThicknessF         = 4.5
-      gsn_polyline_ndc(wks,            (/xleg(i),xleg(i)+0.03/),(/yleg(i),yleg(i)/),gsres)
-      gsn_text_ndc    (wks,labels_b(i),xtxt(i),ytxt(i),txres) 
-    end do
-  end if 
-  end if
-  ;resP                 = True
-  ;frame(wks)
-;  annoid = gsn_add_annotation(plot_alt_1,legend,resP) ; add legend to plot
-else
   gsres               = True
   txres               = True
   gsres@gsMarkerIndex = 16
   txres@txFontHeightF = 0.015
-  colors_leg = (/"darkgoldenrod","mediumorchid3","darkolivegreen3","darkslategray4","grey49","black"/) 
-  labels_b = (/"amip","historical","abrupt 4xCO2","1% CO2 Ramp","CERES-EBAF v2.8","CERES-EBAF v4.1"/)
+    colors_leg = (/"darkolivegreen3","steelblue","red","steelblue1"/) 
+    labels_b = (/"amip p4K","amip m4K","amip Future4K","Aqua p4K"/)
+  ;colors_leg = (/"darkgoldenrod","mediumorchid3","darkolivegreen3","darkslategray4","grey49","black"/) 
+  ;labels_b = (/"amip","historical","abrupt 4xCO2","1% CO2 Ramp","CERES-EBAF v2.8","CERES-EBAF v4.1"/)
   yb=0.37
   yt=0.41
-  xleg = (/0.40,0.40,0.54,0.54,0.74,0.74/)   ; Location of
-  xtxt = (/0.46,0.48,0.65,0.65,0.87,0.87/)   ; legend markers
+  xleg = (/0.40,0.40,0.54,0.54/)   ; Location of
+  xtxt = (/0.48,0.48,0.65,0.62/)   ; legend markers
   yleg = (/yt,yb,yt,yb,yt,yb/)   ; and text
   ytxt = (/yt,yb,yt,yb,yt,yb/)   ; strings.
-  do i = 0,5
+  do i = 0,3
     gsres@gsLineColor              = colors_leg(i)
     gsres@gsLineThicknessF         = 4.5
     gsn_polyline_ndc(wks,            (/xleg(i),xleg(i)+0.03/),(/yleg(i),yleg(i)/),gsres)
     gsn_text_ndc    (wks,labels_b(i),xtxt(i),ytxt(i),txres) 
   end do
-;add legend for middle panel.
-end if
 
  gsn_panel(wks,plot,(/1,1/),resP)
 
   print("=0=-0=-0=-0=-0=0=-0=-0=-0=-0=-0=-0=-0-=0=")
   print("global time mean of tas of PICONTROL is: "+pic_tas_tgmn)
-  print("global time mean of tas of historical is: "+h2_tas_historical_tgmn)
   print("weighted mean of amip over particular years is: "+amip_tas_wave)
-  print("global time mean of tas of 1pctCO2 is: "+abr2_tas_1pctCO2_tgmn)
-  print("global time mean of tas of abrupt4xCO2 is: "+abr2_tas_abrupt4xCO2_tgmn)
-  print("change of tas for selected historical period: "+del_tas_hist)
-del_tas_1pct=abr2_tas_1pctCO2_tgmn-pic_tas_tgmn
-  print("change of tas for selected 1pctCO2 period: "+del_tas_1pct)
-del_tas_abrupt=abr2_tas_abrupt4xCO2_tgmn-pic_tas_tgmn
-  print("change of tas for selected abrupt4xCO2 period: "+del_tas_abrupt)
 del_tas_amip=amip_tas_wave-pic_tas_tgmn
   print("change of tas for selected amip period: "+del_tas_amip)
   print("BLUEFACE")

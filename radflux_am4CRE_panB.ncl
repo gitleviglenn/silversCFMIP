@@ -1,5 +1,5 @@
 ;-------------------------------------------------------------------------
-; radflux_am4CRE.ncl 
+; radflux_am4CRE_panB.ncl 
 ;-------------------------------------------------------------------------
 ;
 ; compute CRE as a function of latitude for particular CFMIP experiments
@@ -10,12 +10,6 @@
 ;
 ; biases can be computed relative to either version of the CERES data
 ; or relative to the piControl experiment of CM4.0
-;
-; everything = 0; plotbias =0; Corresponds to the top panel in which the ceres CRE is plotted
-;                              along with amip historical, abrupt4xCO2, and the 1pctCO2 experiments.
-; everything = 0; plotbias =1; Corresponds to the middle panel
-; everything = 2; plotbias =1; Corresponds to the bottom panel of the CRE figure in the CFMIP paper
-;                              showing amip p4k, m4k, future4K, and aqua p4K
 ;
 ; The cloud radiative effects are normalized for different experiments according
 ; to differing time periods.  I still need to determine an appropriate normalization
@@ -42,7 +36,7 @@ path_obs="/Users/silvers/data/SatData/CERES/"
 ; as of November 2020
 ; everything = 0; plotbias = 1 --> middle panel of figure 7, with CRE feedback relative to piControl
 
-everything = 2 ; switch defining which profiles are plotted
+everything = 0 ; switch defining which profiles are plotted
 ; 0 plots the CRE from: ceres, amip, historical, abrupt, and 1pct
 ; 1 plots the shortwave, longwave, and net CRE for amip and aqua
 ; 2 plots CRE Feedback figure showing aqua and amip-based warming experiments
@@ -979,16 +973,6 @@ cre_sw_aqua_p4K&lat=amip_rsut_aqua_p4K&lat
 cre_net_aqua_p4K!0="lat"
 cre_net_aqua_p4K&lat=amip_rsut_aqua_p4K&lat
 
-;cre_lw_aqua_p4K_tmn!0="lat"
-;cre_lw_aqua_p4K_tmn&lat=amip_rsut_aqua&lat
-;cre_lw_aqua_p4K_tmn!1="lon"
-;cre_lw_aqua_p4K_tmn&lon=amip_rsut_aqua&lon
-
-;cre_sw_aqua_p4K_tmn!0="lat"
-;cre_sw_aqua_p4K_tmn&lat=amip_rsut_aqua&lat
-;cre_sw_aqua_p4K_tmn!1="lon"
-;cre_sw_aqua_p4K_tmn&lon=amip_rsut_aqua&lon
-
 cre_net_aqua_p4K_tmn!0="lat"
 cre_net_aqua_p4K_tmn&lat=amip_rsut_aqua&lat
 cre_net_aqua_p4K_tmn!1="lon"
@@ -1380,20 +1364,6 @@ testaxis=where(latitude.lt.0,-testaxis,testaxis)
   overlay(plot0a,plot0db)
   overlay(plot0a,plot0eb)
 
-;; pretty much everything...
-;  overlay(plot0a,plot0e)
-;  overlay(plot0a,plot0eb)
-;  overlay(plot0a,plot0ec)
-;  overlay(plot0a,plot0b)
-;  overlay(plot0a,plot0bb)
-;  overlay(plot0a,plot0bc)
-;  overlay(plot0a,plot0c)
-;  overlay(plot0a,plot0cb)
-;  overlay(plot0a,plot0cc)
-;  overlay(plot0a,plot0d)
-;  overlay(plot0a,plot0db)
-;  overlay(plot0a,plot0dc)
-
   plot(0)=plot0a
 
 else if (everything .ge. 1) then ; plot the whole shebang
@@ -1438,9 +1408,6 @@ else
   overlay(plot_alt_1,plot_alt_2)
   overlay(plot_alt_1,plot_alt_3)
   overlay(plot_alt_1,plot_alt_4)
-; comment these out if plotting the middle panel with only the warming experiment CRE's...
-;  overlay(plot_alt_1,plot_alt_5) ; ceres
-;  overlay(plot_alt_1,plot_alt_6) ; ceres
   plot(0)=plot_alt_1
 end if
 end if
@@ -1481,29 +1448,15 @@ if (plotbias .le. 0) then ; plot the cre feedback
    lgres@lgDashIndexes = (/"0","0","0","0"/)
    ;resP                 = True
    resP@amJust = "BottomRight"
-   ;resP@amParallelPosF   = 0.42    ; Move legend to right
    resP@amParallelPosF   = -0.12    ; Move legend to right
    resP@amOrthogonalPosF = -0.85     ; Move legend down more negative moves higher
    annoid = gsn_add_annotation(plot0a,legend,resP) ; add legend to plot
-  ;else    ; plot only ceres-ebaf, amip, historical, abrupt 4xCO2, and 1% CO2 ramp
-  ; labels_b = (/"amip","historical","abrupt 4xCO2","1% CO2 Ramp","CERES-EBAF v2.8","CERES-EBAF v4.1"/)
-  ; ;colors = (/"black","darkgoldenrod","darkolivegreen3","steelblue","mediumorchid3","darkslategray4","cyan3"/) 
-  ; lgres@lgLineColors         = (/colors(1),colors(4),colors(5),colors(6),colors(0),colors(0)/)
-  ; lgres@lgDashIndexes          = (/"0","0","0","0","1","0"/)
-  ; legend  = gsn_create_legend (wks, 6, labels_b, lgres)
-  ; resP@amJust = "BottomRight"
-  ; ;resP@amParallelPosF   = -0.08    ; Move legend to right
-  ; ;resP@amOrthogonalPosF = -0.05     ; Move legend down more negative moves higher
-  ; resP@amParallelPosF   = 0.0    ; Move legend to right
-  ; resP@amOrthogonalPosF = 0.05     ; Move legend down more negative moves higher
-  ;
-  ; annoid = gsn_add_annotation(plot_alt_1,legend,resP) ; add legend to plot
   else
     gsres               = True
     txres               = True
     gsres@gsMarkerIndex = 16
     txres@txFontHeightF = 0.015
-    colors_leg = (/"darkgoldenrod","mediumorchid3","darkolivegreen3","darkslategray4","grey49","black"/) 
+    colors_leg = (/"darkgoldenrod","mediumorchid3","cyan3","darkslategray4"/) 
     labels_b = (/"amip","historical","abrupt 4xCO2","1% CO2 Ramp","CERES-EBAF v2.8","CERES-EBAF v4.1"/)
     yb=0.37
     yt=0.41
@@ -1522,26 +1475,26 @@ if (plotbias .le. 0) then ; plot the cre feedback
   ;resP                 = True
   ;frame(wks)
 ;  annoid = gsn_add_annotation(plot_alt_1,legend,resP) ; add legend to plot
-else
+else ; legend for middle panel
   gsres               = True
   txres               = True
   gsres@gsMarkerIndex = 16
   txres@txFontHeightF = 0.015
-  colors_leg = (/"darkgoldenrod","mediumorchid3","darkolivegreen3","darkslategray4","grey49","black"/) 
-  labels_b = (/"amip","historical","abrupt 4xCO2","1% CO2 Ramp","CERES-EBAF v2.8","CERES-EBAF v4.1"/)
+;  colors_leg = (/"darkgoldenrod","mediumorchid3","cyan3","darkslategray4"/) 
+  colors_leg = (/"darkgoldenrod","mediumorchid3","darkslategray4","cyan3"/) 
+  labels_b = (/"amip","historical","abrupt 4xCO2","1% CO2 Ramp"/)
   yb=0.37
   yt=0.41
   xleg = (/0.40,0.40,0.54,0.54,0.74,0.74/)   ; Location of
   xtxt = (/0.46,0.48,0.65,0.65,0.87,0.87/)   ; legend markers
   yleg = (/yt,yb,yt,yb,yt,yb/)   ; and text
   ytxt = (/yt,yb,yt,yb,yt,yb/)   ; strings.
-  do i = 0,5
+  do i = 0,3
     gsres@gsLineColor              = colors_leg(i)
     gsres@gsLineThicknessF         = 4.5
-    gsn_polyline_ndc(wks,            (/xleg(i),xleg(i)+0.03/),(/yleg(i),yleg(i)/),gsres)
+    gsn_polyline_ndc(wks,          (/xleg(i),xleg(i)+0.03/),(/yleg(i),yleg(i)/),gsres)
     gsn_text_ndc    (wks,labels_b(i),xtxt(i),ytxt(i),txres) 
   end do
-;add legend for middle panel.
 end if
 
  gsn_panel(wks,plot,(/1,1/),resP)
